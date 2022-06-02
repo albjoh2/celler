@@ -1,0 +1,28 @@
+Du är typ gud och äger en cell eller så är du en cell, lite oklart än så länge, iaf varje gång cellen delar sig kommer de två nya cellerna att ha muterat till sig lite annorlunda egenskaper jämfört med "föräldracellen", kanske är den snabbare, större, starkare cellväggar, bättre matvanor osv cellen kanske någon gång muteras och bli flercellig. Du får iaf bestämma vilken utav de nya cellerna du vill spara. Kanske kan du ha flera sparade. 
+
+En runda = Din cell möter andra celler i en miljö och cellen som överlever längst vinner. De behöver inte slåss bara se vem som överlever.
+
+Egenskaper:
+DNA mängd - hur avancerad cellen/cellerna kan bli
+DNA 1:
+Energi - tid cellen klarar sig utan att tillföra energi till kroppen.
+Snabbhet - hur snabbt cellen rör sig. 
+Storlek - hur stor är cellen? En stor cell behöver mer energi för att klara sig.
+
+DNA 2:
+Syn - hur långt cellen ser.
+
+DNA 3:
+Drifter - vad rör sig cellen mot och bort från, färger. 
+
+DNA 4:
+Smartare Drifter, storlek på objekt, om objekt rör sig mm, prioritera,
+
+
+Att implementera i steg 1:
+cell som 
+1. rör sig i en randomatiserad hastighet och med en randomatiserad storlek.
+2. har en energimätare som kan ta slut och fyllas på när cellen rör mat.
+
+Att implementera i steg 2:
+1. att en runda startar och avslutas med nya värden
