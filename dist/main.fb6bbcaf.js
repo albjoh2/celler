@@ -189,281 +189,7 @@ var reloadCSS = require('_css_loader');
 
 module.hot.dispose(reloadCSS);
 module.hot.accept(reloadCSS);
-},{"_css_loader":"../node_modules/parcel-bundler/src/builtins/css-loader.js"}],"js/object-creators/cell-creator.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.genereraDinCell = void 0;
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-var genereraDinCell = function genereraDinCell(c, minCell, foodlist, nrOfChildrenCells) {
-  var x = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : Math.random() * (window.innerWidth - 10 - minCell.diameter) + minCell.diameter;
-  var y = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : Math.random() * (window.innerHeight - 10 - minCell.diameter) + minCell.diameter;
-
-  var Cell = /*#__PURE__*/function () {
-    function Cell(x, y, radius, color, energi, celldelningsProgress, hastighet, jumpLength) {
-      _classCallCheck(this, Cell);
-
-      this.x = x;
-      this.y = y;
-      this.radius = radius;
-      this.color = color;
-      this.energi = energi;
-      this.celldelningsProgress = celldelningsProgress;
-      this.hastighet = hastighet;
-      this.jumpLength = jumpLength;
-    }
-
-    _createClass(Cell, [{
-      key: "draw",
-      value: function draw() {
-        c.beginPath();
-        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-        c.fillStyle = this.color;
-        c.fill();
-        c.beginPath();
-        c.fillStyle = "#3df322";
-        c.fillRect(this.x - this.radius, this.y + this.radius * 1.5, this.radius * 2 / 1000 * this.celldelningsProgress, 3);
-        c.stroke();
-        c.fillStyle = "#aaf322";
-        c.fillRect(this.x - this.radius, this.y + this.radius * 1.1, this.radius * 2 / 1000 * this.energi, 3);
-      }
-    }, {
-      key: "update",
-      value: function update() {
-        this.jump();
-        this.draw();
-
-        if (this.energi >= 0) {
-          this.energi -= 1;
-        }
-
-        if (this.celldelningsProgress >= 0) {
-          this.celldelningsProgress -= 0.2;
-        }
-      }
-    }, {
-      key: "jump",
-      value: function jump() {
-        var jumpY = Math.random();
-        var jumpX = Math.random();
-
-        if (jumpX > 0.6666) {
-          if (this.x < window.innerWidth - this.radius) this.x += this.jumpLength;
-        }
-
-        if (jumpX < 0.3334) {
-          if (this.x > 0 + this.radius) this.x -= this.jumpLength;
-        }
-
-        if (jumpY > 0.6666) {
-          if (this.y < window.innerHeight - this.radius) this.y += this.jumpLength;
-        }
-
-        if (jumpY < 0.3334) {
-          if (this.y > 0 + this.radius) this.y -= this.jumpLength;
-        }
-      }
-    }]);
-
-    return Cell;
-  }();
-
-  var Food = /*#__PURE__*/function () {
-    function Food(x, y, radius, color) {
-      _classCallCheck(this, Food);
-
-      this.x = x;
-      this.y = y;
-      this.radius = radius;
-      this.color = color;
-    }
-
-    _createClass(Food, [{
-      key: "draw",
-      value: function draw() {
-        c.beginPath();
-        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-        c.fillStyle = this.color;
-        c.fill();
-      }
-    }]);
-
-    return Food;
-  }();
-
-  var food = new Food(30, 10, 10, "lightgreen");
-  var cell = new Cell(10, 30, 10, "#000000", 1000, 1000, 1, 1);
-  var cells = [cell];
-  var diameter = minCell.diameter,
-      hastighet = minCell.hastighet,
-      energi = minCell.energi,
-      matTillCelldelning = minCell.matTillCelldelning;
-  c.beginPath();
-  c.arc(x - diameter / 2, y - diameter / 2, diameter / 2, 0, Math.PI * 2, false);
-  c.strokeStyle = "#000";
-  c.stroke();
-  c.fillRect(x, y, 100, 10);
-  var animateX = x;
-  var animateY = y;
-  var rundansEnergi = energi;
-  var rundansMatTillCelldelning = matTillCelldelning;
-
-  function animateFood() {
-    requestAnimationFrame(animateFood);
-    cells.forEach(function (cell) {
-      return cell.update();
-    });
-    food.draw();
-
-    if (rundansEnergi >= 0) {
-      rundansEnergi -= 1;
-    }
-
-    if (rundansMatTillCelldelning >= 0) {
-      rundansMatTillCelldelning -= 0.2;
-    }
-
-    for (var _food in foodlist) {
-      var _foodlist$_food = foodlist[_food],
-          _x = _foodlist$_food.x,
-          _y = _foodlist$_food.y,
-          _diameter = _foodlist$_food.diameter;
-      c.beginPath();
-      c.arc(_x, _y, _diameter, 0, Math.PI * 2, false);
-      c.strokeStyle = "#44af2a";
-      c.fillStyle = "#44af2a";
-      c.fill();
-      c.stroke();
-
-      if (animateX - minCell.diameter < _x && _x < animateX) {
-        if (animateY - minCell.diameter < _y && _y < animateY) {
-          if (rundansEnergi >= 1000) {
-            rundansMatTillCelldelning++;
-          } else rundansEnergi += 2;
-        }
-      }
-    }
-
-    if (rundansMatTillCelldelning > 1000) {
-      nrOfChildrenCells += 1;
-      document.querySelector(".cells").textContent = nrOfChildrenCells;
-      genereraDinCell(c, minCell, foodlist, nrOfChildrenCells, animateX, animateY);
-      rundansMatTillCelldelning = 0;
-      rundansEnergi = 500;
-    }
-  }
-
-  animateFood();
-
-  function animate() {
-    var id = requestAnimationFrame(animate);
-
-    if (rundansEnergi <= 0) {
-      nrOfChildrenCells -= 1;
-      document.querySelector(".cells").textContent = nrOfChildrenCells;
-      cancelAnimationFrame(id);
-    }
-
-    c.beginPath();
-    c.arc(animateX - diameter / 2, animateY - diameter / 2, diameter / 2, 0, Math.PI * 2, false);
-    c.fillStyle = "#000";
-    c.fill();
-    c.strokeStyle = "#000";
-    c.stroke();
-    c.beginPath();
-    c.fillStyle = "#3df322";
-    c.fillRect(animateX - diameter, animateY + diameter / 4, diameter / 1000 * rundansMatTillCelldelning, 3);
-    c.stroke();
-    c.fillStyle = "#aaf322";
-    c.fillRect(animateX - diameter, animateY + diameter / 6, diameter / 1000 * rundansEnergi, 3);
-    var directionY = Math.random();
-
-    if (directionY > 0.6666) {
-      if (animateY < window.innerHeight - diameter) animateY += hastighet;
-    }
-
-    if (directionY < 0.3334) {
-      if (animateY > 0 + diameter) animateY -= hastighet;
-    }
-
-    var directionX = Math.random();
-
-    if (directionX > 0.6666) {
-      if (animateX < window.innerWidth - diameter) animateX += hastighet;
-    }
-
-    if (directionX < 0.3334) {
-      if (animateX > 0 + diameter) animateX -= hastighet;
-    }
-  }
-
-  animate();
-}; // export const genereraMotståndarCell = (c, stateOfGame) => {
-//   const { svårighetsgrad } = stateOfGame;
-//   const diameter = (Math.random() * (50 - 25) + 25) * svårighetsgrad;
-//   const x =
-//     (Math.random() * (window.innerWidth - 10 - diameter) + diameter) *
-//     svårighetsgrad;
-//   const y =
-//     (Math.random() * (window.innerHeight - 10 - diameter) + diameter) *
-//     svårighetsgrad;
-//   c.beginPath();
-//   c.arc(
-//     x - diameter / 2,
-//     y - diameter / 2,
-//     diameter / 2,
-//     0,
-//     Math.PI * 2,
-//     false
-//   );
-//   c.strokeStyle = "#ea4f00";
-//   c.stroke();
-//   let animateX = x;
-//   let animateY = y;
-//   function animate() {
-//     requestAnimationFrame(animate);
-//     c.beginPath();
-//     c.arc(
-//       animateX - diameter / 2,
-//       animateY - diameter / 2,
-//       diameter / 2,
-//       0,
-//       Math.PI * 2,
-//       false
-//     );
-//     c.strokeStyle = "#ea4f00";
-//     c.fillStyle = "#ea4f00";
-//     c.fill();
-//     c.stroke();
-//     const directionY = Math.random();
-//     if (directionY > 0.6666) {
-//       if (animateY < window.innerHeight - diameter) animateY++;
-//     }
-//     if (directionY < 0.3334) {
-//       if (animateY > 0 + diameter) animateY--;
-//     }
-//     const directionX = Math.random();
-//     if (directionX > 0.6666) {
-//       if (animateX < window.innerWidth - diameter) animateX++;
-//     }
-//     if (directionX < 0.3334) {
-//       if (animateX > 0 + diameter) animateX--;
-//     }
-//   }
-//   animate();
-// };
-
-
-exports.genereraDinCell = genereraDinCell;
-},{}],"js/object-creators/food-creator.js":[function(require,module,exports) {
+},{"_css_loader":"../node_modules/parcel-bundler/src/builtins/css-loader.js"}],"js/object-creators/food-creator.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -471,17 +197,17 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.genereraMat = void 0;
 
-var genereraMat = function genereraMat(c, svårighetsgrad) {
+var genereraMat = function genereraMat(c) {
   var foodlist = [];
 
-  for (var i = 0; i < 50 / svårighetsgrad; i++) {
-    var diameter = Math.random() * (5 - 2) + 2;
-    var x = Math.random() * (window.innerWidth - 10 - diameter) + diameter;
-    var y = Math.random() * (window.innerHeight - 10 - diameter) + diameter;
+  for (var i = 0; i < 50; i++) {
+    var radius = Math.random() * (5 - 2) + 2;
+    var x = Math.random() * (window.innerWidth - 10 - radius) + radius;
+    var y = Math.random() * (window.innerHeight - 10 - radius) + radius;
     foodlist.push({
       x: x,
       y: y,
-      diameter: diameter
+      radius: radius
     });
   }
 
@@ -495,45 +221,180 @@ exports.genereraMat = genereraMat;
 
 require("../scss/main.scss");
 
-var _cellCreator = require("./object-creators/cell-creator");
-
 var _foodCreator = require("./object-creators/food-creator");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
 var canvas = document.querySelector(".plan");
 canvas.width = window.innerWidth - 10;
 canvas.height = window.innerHeight - 10;
 var c = canvas.getContext("2d");
-var stateOfGame = {
-  svårighetsgrad: 1,
-  antalMotståndare: 5
-};
-var minCell = {
-  dnaMängd: 1,
-  diameter: Math.random() * (50 - 25) + 25,
-  hastighet: Math.random() * (5 - 0) + 0,
-  energi: 1000,
-  matTillCelldelning: 0
-};
 var nrOfChildrenCells = 1;
+document.querySelector(".cells").textContent = nrOfChildrenCells;
+var foodlist = (0, _foodCreator.genereraMat)(c);
 
-var startaRunda = function startaRunda(c, stateOfGame, minCell) {
-  var antalMotståndare = stateOfGame.antalMotståndare,
-      svårighetsgrad = stateOfGame.svårighetsgrad;
+var Cell = /*#__PURE__*/function () {
+  function Cell(id, children, x, y, radius, color, energi, celldelningsProgress, hastighet, jumpLength, energiUpptagning, delningsEffektivitet) {
+    _classCallCheck(this, Cell);
 
-  function cleanScreenOnNewFrame() {
-    requestAnimationFrame(cleanScreenOnNewFrame);
-    c.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    this.id = id;
+    this.children = children;
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.color = color;
+    this.energi = energi;
+    this.celldelningsProgress = celldelningsProgress;
+    this.hastighet = hastighet;
+    this.jumpLength = jumpLength;
+    this.energiUpptagning = energiUpptagning;
+    this.delningsEffektivitet = delningsEffektivitet;
   }
 
-  cleanScreenOnNewFrame();
-  var foodlist = (0, _foodCreator.genereraMat)(c, svårighetsgrad);
-  (0, _cellCreator.genereraDinCell)(c, minCell, foodlist, nrOfChildrenCells); //   for (let i = 0; i < antalMotståndare; i++) {
-  //     genereraMotståndarCell(c, stateOfGame, foodlist);
-  //   }
-};
+  _createClass(Cell, [{
+    key: "draw",
+    value: function draw() {
+      c.beginPath();
+      c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+      c.fillStyle = this.color;
+      c.fill();
+      c.beginPath();
+      c.fillStyle = "#3df322";
+      c.fillRect(this.x - this.radius, this.y + this.radius * 1.5, this.radius * 2 / 1000 * this.celldelningsProgress, 3);
+      c.stroke();
+      c.fillStyle = "#aaf322";
+      c.fillRect(this.x - this.radius, this.y + this.radius * 1.1, this.radius * 2 / 1000 * this.energi, 3);
+    }
+  }, {
+    key: "update",
+    value: function update() {
+      var _this = this;
 
-startaRunda(c, stateOfGame, minCell);
-},{"../scss/main.scss":"scss/main.scss","./object-creators/cell-creator":"js/object-creators/cell-creator.js","./object-creators/food-creator":"js/object-creators/food-creator.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+      this.jump();
+      this.draw();
+
+      if (this.energi >= 0) {
+        this.energi -= 1;
+      }
+
+      if (this.celldelningsProgress >= 0) {
+        this.celldelningsProgress -= 0.2;
+      }
+
+      for (var food in foodlist) {
+        var _foodlist$food = foodlist[food],
+            x = _foodlist$food.x,
+            y = _foodlist$food.y,
+            radius = _foodlist$food.radius; //TODO Gör maten mindre när man äter av den.
+
+        if (this.x < x + this.radius && x - this.radius < this.x) {
+          if (this.y < y + this.radius && y - this.radius < this.y) {
+            if (this.energi >= 1000) {
+              this.celldelningsProgress += this.delningsEffektivitet * radius / 4;
+            } else this.energi += this.energiUpptagning * radius / 4;
+          }
+        }
+      }
+
+      if (this.celldelningsProgress > 1000) {
+        nrOfChildrenCells += 1;
+        document.querySelector(".cells").textContent = nrOfChildrenCells;
+        this.children++;
+        var newID = "".concat(this.id).concat(this.children);
+        cells.push(new Cell(newID, 0, this.x, this.y, this.radius, this.color, 500, 0, this.hastighet, this.jumpLength, this.energiUpptagning, this.delningsEffektivitet));
+        console.log(cells);
+        this.celldelningsProgress = 0;
+        this.energi = 500;
+      }
+
+      if (this.energi <= 0) {
+        nrOfChildrenCells -= 1;
+        document.querySelector(".cells").textContent = nrOfChildrenCells;
+        var filteredArray = cells.filter(function (cell) {
+          return cell.id !== _this.id;
+        });
+        cells = filteredArray;
+      }
+    }
+  }, {
+    key: "jump",
+    value: function jump() {
+      var jumpY = Math.random();
+      var jumpX = Math.random();
+
+      if (jumpX > 0.6666) {
+        if (this.x < window.innerWidth - this.radius) this.x += this.jumpLength;
+      }
+
+      if (jumpX < 0.3334) {
+        if (this.x > 0 + this.radius) this.x -= this.jumpLength;
+      }
+
+      if (jumpY > 0.6666) {
+        if (this.y < window.innerHeight - this.radius) this.y += this.jumpLength;
+      }
+
+      if (jumpY < 0.3334) {
+        if (this.y > 0 + this.radius) this.y -= this.jumpLength;
+      }
+    }
+  }]);
+
+  return Cell;
+}();
+
+var Food = /*#__PURE__*/function () {
+  function Food(x, y, radius, color) {
+    _classCallCheck(this, Food);
+
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.color = color;
+  }
+
+  _createClass(Food, [{
+    key: "draw",
+    value: function draw() {
+      c.beginPath();
+      c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+      c.fillStyle = this.color;
+      c.fill();
+    }
+  }]);
+
+  return Food;
+}();
+
+var cell = new Cell("1", 0, 10, 30, 20, "#000000", 500, 0, 1, 1, 4, 10);
+var cells = [cell];
+var foods = [];
+
+for (var food in foodlist) {
+  var _foodlist$food2 = foodlist[food],
+      x = _foodlist$food2.x,
+      y = _foodlist$food2.y,
+      radius = _foodlist$food2.radius;
+  foods[food] = new Food(x, y, radius, "lightgreen");
+}
+
+function animate() {
+  c.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  requestAnimationFrame(animate);
+  cells.forEach(function (cell) {
+    return cell.update();
+  });
+  foods.forEach(function (food) {
+    return food.draw();
+  });
+}
+
+animate();
+},{"../scss/main.scss":"scss/main.scss","./object-creators/food-creator":"js/object-creators/food-creator.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;

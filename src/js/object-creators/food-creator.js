@@ -1,10 +1,10 @@
-export const genereraMat = (c, svårighetsgrad) => {
+export const genereraMat = (c) => {
   const foodlist = [];
-  for (let i = 0; i < 50 / svårighetsgrad; i++) {
-    const diameter = Math.random() * (5 - 2) + 2;
-    const x = Math.random() * (window.innerWidth - 10 - diameter) + diameter;
-    const y = Math.random() * (window.innerHeight - 10 - diameter) + diameter;
-    foodlist.push({ x, y, diameter });
+  for (let i = 0; i < 50; i++) {
+    const radius = Math.random() * (5 - 2) + 2;
+    const x = Math.random() * (window.innerWidth - 10 - radius) + radius;
+    const y = Math.random() * (window.innerHeight - 10 - radius) + radius;
+    foodlist.push({ x, y, radius });
   }
   console.log(foodlist);
   return foodlist;

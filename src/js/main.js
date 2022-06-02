@@ -1,8 +1,4 @@
 import "../scss/main.scss";
-import {
-  genereraDinCell,
-  genereraMotståndarCell,
-} from "./object-creators/cell-creator";
 import { genereraMat } from "./object-creators/food-creator";
 
 const canvas = document.querySelector(".plan");
@@ -12,37 +8,172 @@ canvas.height = window.innerHeight - 10;
 
 const c = canvas.getContext("2d");
 
-const stateOfGame = {
-  svårighetsgrad: 1,
-  antalMotståndare: 5,
-};
-
-const minCell = {
-  dnaMängd: 1,
-  diameter: Math.random() * (50 - 25) + 25,
-  hastighet: Math.random() * (5 - 0) + 0,
-  energi: 1000,
-  matTillCelldelning: 0,
-};
-
 let nrOfChildrenCells = 1;
+document.querySelector(".cells").textContent = nrOfChildrenCells;
 
-const startaRunda = (c, stateOfGame, minCell) => {
-  const { antalMotståndare, svårighetsgrad } = stateOfGame;
+const foodlist = genereraMat(c);
 
-  function cleanScreenOnNewFrame() {
-    requestAnimationFrame(cleanScreenOnNewFrame);
-    c.clearRect(0, 0, window.innerWidth, window.innerHeight);
+class Cell {
+  constructor(
+    id,
+    children,
+    x,
+    y,
+    radius,
+    color,
+    energi,
+    celldelningsProgress,
+    hastighet,
+    jumpLength,
+    energiUpptagning,
+    delningsEffektivitet
+  ) {
+    this.id = id;
+    this.children = children;
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.color = color;
+    this.energi = energi;
+    this.celldelningsProgress = celldelningsProgress;
+    this.hastighet = hastighet;
+    this.jumpLength = jumpLength;
+    this.energiUpptagning = energiUpptagning;
+    this.delningsEffektivitet = delningsEffektivitet;
   }
-  cleanScreenOnNewFrame();
 
-  const foodlist = genereraMat(c, svårighetsgrad);
+  draw() {
+    c.beginPath();
+    c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+    c.fillStyle = this.color;
+    c.fill();
 
-  genereraDinCell(c, minCell, foodlist, nrOfChildrenCells);
+    c.beginPath();
+    c.fillStyle = "#3df322";
+    c.fillRect(
+      this.x - this.radius,
+      this.y + this.radius * 1.5,
+      ((this.radius * 2) / 1000) * this.celldelningsProgress,
+      3
+    );
+    c.stroke();
 
-  //   for (let i = 0; i < antalMotståndare; i++) {
-  //     genereraMotståndarCell(c, stateOfGame, foodlist);
-  //   }
-};
+    c.fillStyle = "#aaf322";
+    c.fillRect(
+      this.x - this.radius,
+      this.y + this.radius * 1.1,
+      ((this.radius * 2) / 1000) * this.energi,
+      3
+    );
+  }
 
-startaRunda(c, stateOfGame, minCell);
+  update() {
+    this.jump();
+    this.draw();
+    if (this.energi >= 0) {
+      this.energi -= 1;
+    }
+    if (this.celldelningsProgress >= 0) {
+      this.celldelningsProgress -= 0.2;
+    }
+    for (let food in foodlist) {
+      const { x, y, radius } = foodlist[food];
+      //TODO Gör maten mindre när man äter av den.
+      if (this.x < x + this.radius && x - this.radius < this.x) {
+        if (this.y < y + this.radius && y - this.radius < this.y) {
+          if (this.energi >= 1000) {
+            this.celldelningsProgress +=
+              (this.delningsEffektivitet * radius) / 4;
+          } else this.energi += (this.energiUpptagning * radius) / 4;
+        }
+      }
+    }
+
+    if (this.celldelningsProgress > 1000) {
+      nrOfChildrenCells += 1;
+      document.querySelector(".cells").textContent = nrOfChildrenCells;
+      this.children++;
+      const newID = `${this.id}${this.children}`;
+      cells.push(
+        new Cell(
+          newID,
+          0,
+          this.x,
+          this.y,
+          this.radius,
+          this.color,
+          500,
+          0,
+          this.hastighet,
+          this.jumpLength,
+          this.energiUpptagning,
+          this.delningsEffektivitet
+        )
+      );
+      console.log(cells);
+      this.celldelningsProgress = 0;
+      this.energi = 500;
+    }
+
+    if (this.energi <= 0) {
+      nrOfChildrenCells -= 1;
+      document.querySelector(".cells").textContent = nrOfChildrenCells;
+
+      let filteredArray = cells.filter((cell) => cell.id !== this.id);
+
+      cells = filteredArray;
+    }
+  }
+
+  jump() {
+    const jumpY = Math.random();
+    const jumpX = Math.random();
+    if (jumpX > 0.6666) {
+      if (this.x < window.innerWidth - this.radius) this.x += this.jumpLength;
+    }
+    if (jumpX < 0.3334) {
+      if (this.x > 0 + this.radius) this.x -= this.jumpLength;
+    }
+    if (jumpY > 0.6666) {
+      if (this.y < window.innerHeight - this.radius) this.y += this.jumpLength;
+    }
+    if (jumpY < 0.3334) {
+      if (this.y > 0 + this.radius) this.y -= this.jumpLength;
+    }
+  }
+}
+
+class Food {
+  constructor(x, y, radius, color) {
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.color = color;
+  }
+
+  draw() {
+    c.beginPath();
+    c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+    c.fillStyle = this.color;
+    c.fill();
+  }
+}
+
+const cell = new Cell("1", 0, 10, 30, 20, "#000000", 500, 0, 1, 1, 4, 10);
+
+let cells = [cell];
+const foods = [];
+
+for (let food in foodlist) {
+  const { x, y, radius } = foodlist[food];
+  foods[food] = new Food(x, y, radius, "lightgreen");
+}
+
+function animate() {
+  c.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  requestAnimationFrame(animate);
+  cells.forEach((cell) => cell.update());
+  foods.forEach((food) => food.draw());
+}
+
+animate();
