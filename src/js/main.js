@@ -71,16 +71,25 @@ class Cell {
     this.jump();
     this.draw();
     if (this.energi >= 0) {
-      this.energi -= 1;
+      this.energi -= 0.3;
     }
     if (this.celldelningsProgress >= 0) {
       this.celldelningsProgress -= 0.2;
     }
-    for (let food in foodlist) {
-      const { x, y, radius } = foodlist[food];
+    for (let food in foods) {
+      const { x, y, radius } = foods[food];
       //TODO Gör maten mindre när man äter av den.
+      foods.forEach((food) => {
+        if (food.radius < 1) food.radius += 0.0000005;
+        if (food.radius < 3) food.radius += 0.0000001;
+        food.radius += 0.00000001;
+      });
+
       if (this.x < x + this.radius && x - this.radius < this.x) {
         if (this.y < y + this.radius && y - this.radius < this.y) {
+          if (foods[food].radius >= 0.1) {
+            foods[food].radius -= 0.005;
+          }
           if (this.energi >= 1000) {
             this.celldelningsProgress +=
               (this.delningsEffektivitet * radius) / 4;
@@ -159,7 +168,7 @@ class Food {
   }
 }
 
-const cell = new Cell("1", 0, 10, 30, 20, "#000000", 500, 0, 1, 1, 4, 10);
+const cell = new Cell("1", 0, 400, 200, 20, "#000000", 500, 0, 1, 1, 4, 10);
 
 let cells = [cell];
 const foods = [];

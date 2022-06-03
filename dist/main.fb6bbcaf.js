@@ -200,7 +200,7 @@ exports.genereraMat = void 0;
 var genereraMat = function genereraMat(c) {
   var foodlist = [];
 
-  for (var i = 0; i < 50; i++) {
+  for (var i = 0; i < 100; i++) {
     var radius = Math.random() * (5 - 2) + 2;
     var x = Math.random() * (window.innerWidth - 10 - radius) + radius;
     var y = Math.random() * (window.innerHeight - 10 - radius) + radius;
@@ -278,21 +278,31 @@ var Cell = /*#__PURE__*/function () {
       this.draw();
 
       if (this.energi >= 0) {
-        this.energi -= 1;
+        this.energi -= 0.3;
       }
 
       if (this.celldelningsProgress >= 0) {
         this.celldelningsProgress -= 0.2;
       }
 
-      for (var food in foodlist) {
-        var _foodlist$food = foodlist[food],
-            x = _foodlist$food.x,
-            y = _foodlist$food.y,
-            radius = _foodlist$food.radius; //TODO Gör maten mindre när man äter av den.
+      for (var food in foods) {
+        var _foods$food = foods[food],
+            x = _foods$food.x,
+            y = _foods$food.y,
+            radius = _foods$food.radius; //TODO Gör maten mindre när man äter av den.
+
+        foods.forEach(function (food) {
+          if (food.radius < 1) food.radius += 0.0000005;
+          if (food.radius < 3) food.radius += 0.0000001;
+          food.radius += 0.00000001;
+        });
 
         if (this.x < x + this.radius && x - this.radius < this.x) {
           if (this.y < y + this.radius && y - this.radius < this.y) {
+            if (foods[food].radius >= 0.1) {
+              foods[food].radius -= 0.005;
+            }
+
             if (this.energi >= 1000) {
               this.celldelningsProgress += this.delningsEffektivitet * radius / 4;
             } else this.energi += this.energiUpptagning * radius / 4;
@@ -370,15 +380,15 @@ var Food = /*#__PURE__*/function () {
   return Food;
 }();
 
-var cell = new Cell("1", 0, 10, 30, 20, "#000000", 500, 0, 1, 1, 4, 10);
+var cell = new Cell("1", 0, 400, 200, 20, "#000000", 500, 0, 1, 1, 4, 10);
 var cells = [cell];
 var foods = [];
 
 for (var food in foodlist) {
-  var _foodlist$food2 = foodlist[food],
-      x = _foodlist$food2.x,
-      y = _foodlist$food2.y,
-      radius = _foodlist$food2.radius;
+  var _foodlist$food = foodlist[food],
+      x = _foodlist$food.x,
+      y = _foodlist$food.y,
+      radius = _foodlist$food.radius;
   foods[food] = new Food(x, y, radius, "lightgreen");
 }
 
@@ -422,7 +432,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54536" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49761" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
