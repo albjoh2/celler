@@ -20,7 +20,9 @@ class Cell {
     x,
     y,
     radius,
-    color,
+    r,
+    g,
+    b,
     energi,
     celldelningsProgress,
     hastighet,
@@ -33,7 +35,10 @@ class Cell {
     this.x = x;
     this.y = y;
     this.radius = radius;
-    this.color = color;
+    this.r = r;
+    this.g = g;
+    this.b = b;
+    this.color = `rgb(${r}, ${g}, ${b})`;
     this.energi = energi;
     this.celldelningsProgress = celldelningsProgress;
     this.hastighet = hastighet;
@@ -80,9 +85,10 @@ class Cell {
       const { x, y, radius } = foods[food];
       //TODO Gör maten mindre när man äter av den.
       foods.forEach((food) => {
-        if (food.radius < 1) food.radius += 0.0000005;
-        if (food.radius < 3) food.radius += 0.0000001;
-        food.radius += 0.00000001;
+        if (food.radius < 1) food.radius += 0.0000002;
+        if (food.radius < 2) food.radius += 0.00000002;
+        if (food.radius < 3) food.radius += 0.000000005;
+        food.radius += 0.0000000005;
       });
 
       if (this.x < x + this.radius && x - this.radius < this.x) {
@@ -91,9 +97,9 @@ class Cell {
             foods[food].radius -= 0.005;
           }
           if (this.energi >= 1000) {
-            this.celldelningsProgress +=
-              (this.delningsEffektivitet * radius) / 4;
-          } else this.energi += (this.energiUpptagning * radius) / 4;
+            this.celldelningsProgress += this.delningsEffektivitet * radius;
+          } else if (foods[food].radius > 1.1)
+            this.energi += this.energiUpptagning * radius - 0.13;
         }
       }
     }
@@ -102,21 +108,23 @@ class Cell {
       nrOfChildrenCells += 1;
       document.querySelector(".cells").textContent = nrOfChildrenCells;
       this.children++;
-      const newID = `${this.id}${this.children}`;
+      const newID = `${this.id}-${this.children}`;
       cells.push(
         new Cell(
           newID,
           0,
           this.x,
           this.y,
-          this.radius,
-          this.color,
+          this.radius * (Math.random() * (0.95 - 1.05) + 1.05),
+          this.r * (Math.random() * (0.96 - 1.04) + 1.04),
+          this.g * (Math.random() * (0.96 - 1.04) + 1.04),
+          this.b * (Math.random() * (0.96 - 1.04) + 1.04),
           500,
           0,
           this.hastighet,
-          this.jumpLength,
-          this.energiUpptagning,
-          this.delningsEffektivitet
+          this.jumpLength * (Math.random() * (0.95 - 1.05) + 1.05),
+          this.energiUpptagning * (Math.random() * (0.95 - 1.05) + 1.05),
+          this.delningsEffektivitet * (Math.random() * (0.95 - 1.05) + 1.05)
         )
       );
       console.log(cells);
@@ -131,6 +139,7 @@ class Cell {
       let filteredArray = cells.filter((cell) => cell.id !== this.id);
 
       cells = filteredArray;
+      console.log(cells);
     }
   }
 
@@ -168,7 +177,7 @@ class Food {
   }
 }
 
-const cell = new Cell("1", 0, 400, 200, 20, "#000000", 500, 0, 1, 1, 4, 10);
+const cell = new Cell("1", 0, 400, 200, 20, 125, 125, 125, 500, 0, 1, 1, 1, 3);
 
 let cells = [cell];
 const foods = [];
@@ -180,9 +189,28 @@ for (let food in foodlist) {
 
 function animate() {
   c.clearRect(0, 0, window.innerWidth, window.innerHeight);
-  requestAnimationFrame(animate);
+  const animationID = requestAnimationFrame(animate);
   cells.forEach((cell) => cell.update());
   foods.forEach((food) => food.draw());
+  if (cells.length > 99) {
+    c.clearRect(0, 0, innerWidth, innerHeight);
+    let x = 0;
+    let y = 0;
+    for (Cell in cells) {
+      if (Cell % 15 === 0) {
+        y += 40;
+        x = 0;
+      }
+      x += 40;
+      cells[Cell].x = x;
+      cells[Cell].y = y;
+
+      cells[Cell].energi = 0;
+      cells[Cell].celldelningsProgress = 0;
+      cells[Cell].draw();
+    }
+    cancelAnimationFrame(animationID);
+  }
 }
 
 animate();
