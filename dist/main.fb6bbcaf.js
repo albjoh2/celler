@@ -200,10 +200,10 @@ exports.genereraMat = void 0;
 var genereraMat = function genereraMat(c) {
   var foodlist = [];
 
-  for (var i = 0; i < 400; i++) {
-    var radius = Math.random() * (3 - 2) + 2;
-    var x = Math.random() * (window.innerWidth - 10 - radius) + radius;
-    var y = Math.random() * (window.innerHeight - 10 - radius) + radius;
+  for (var i = 0; i < 500; i++) {
+    var radius = Math.random() * (3 - 1) + 1;
+    var x = Math.random() * (702 - radius) + radius;
+    var y = Math.random() * (425 - radius) + radius;
     foodlist.push({
       x: x,
       y: y,
@@ -230,8 +230,8 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
 var canvas = document.querySelector(".plan");
-canvas.width = window.innerWidth - 10;
-canvas.height = window.innerHeight - 10;
+canvas.width = 702;
+canvas.height = 425;
 var c = canvas.getContext("2d");
 var nrOfChildrenCells = 1;
 document.querySelector(".cells").textContent = nrOfChildrenCells;
@@ -249,13 +249,14 @@ var Cell = /*#__PURE__*/function () {
     this.r = r;
     this.g = g;
     this.b = b;
-    this.color = "rgb(".concat(r, ", ").concat(g, ", ").concat(b, ")");
+    this.color = "rgba(".concat(r, ",").concat(g, ",").concat(b, ",0.4)");
     this.energi = energi;
     this.celldelningsProgress = celldelningsProgress;
     this.hastighet = hastighet;
     this.jumpLength = jumpLength;
     this.energiUpptagning = energiUpptagning;
     this.delningsEffektivitet = delningsEffektivitet;
+    this.dead = false;
   }
 
   _createClass(Cell, [{
@@ -265,10 +266,20 @@ var Cell = /*#__PURE__*/function () {
       c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
       c.fillStyle = this.color;
       c.fill();
+
+      if (!this.dead) {
+        c.strokestyle = "yellow";
+        c.stroke();
+
+        if (this.children === 0) {
+          c.strokestyle = "red";
+          c.stroke();
+        }
+      }
+
       c.beginPath();
       c.fillStyle = "#3df322";
       c.fillRect(this.x - this.radius, this.y + this.radius * 1.5, this.radius * 2 / 1000 * this.celldelningsProgress, 3);
-      c.stroke();
       c.fillStyle = "#aaf322";
       c.fillRect(this.x - this.radius, this.y + this.radius * 1.1, this.radius * 2 / 1000 * this.energi, 3);
     }
@@ -281,11 +292,11 @@ var Cell = /*#__PURE__*/function () {
       this.draw();
 
       if (this.energi >= 0) {
-        this.energi -= 0.3;
+        this.energi -= 0.2;
       }
 
       if (this.celldelningsProgress >= 0) {
-        this.celldelningsProgress -= 0.2;
+        this.celldelningsProgress -= 0.1;
       }
 
       for (var food in foods) {
@@ -295,16 +306,17 @@ var Cell = /*#__PURE__*/function () {
             radius = _foods$food.radius; //TODO Gör maten mindre när man äter av den.
 
         foods.forEach(function (food) {
-          if (food.radius < 1) food.radius += 0.0000002;
-          if (food.radius < 2) food.radius += 0.00000002;
+          if (food.radius < 0.5) food.radius += 0.0000005;
+          if (food.radius < 1) food.radius += 0.00000005;
+          if (food.radius < 2) food.radius += 0.000000005;
           if (food.radius < 3) food.radius += 0.000000005;
-          food.radius += 0.0000000005;
+          food.radius += 0.000000005;
         });
 
         if (this.x < x + this.radius && x - this.radius < this.x) {
           if (this.y < y + this.radius && y - this.radius < this.y) {
             if (foods[food].radius >= 0.1) {
-              foods[food].radius -= 0.005;
+              foods[food].radius -= 0.01;
             }
 
             if (this.energi >= 1000) {
@@ -319,20 +331,20 @@ var Cell = /*#__PURE__*/function () {
         document.querySelector(".cells").textContent = nrOfChildrenCells;
         this.children++;
         var newID = "".concat(this.id, "-").concat(this.children);
-        cells.push(new Cell(newID, 0, this.x, this.y, this.radius * (Math.random() * (0.95 - 1.05) + 1.05), this.r * (Math.random() * (0.96 - 1.04) + 1.04), this.g * (Math.random() * (0.96 - 1.04) + 1.04), this.b * (Math.random() * (0.96 - 1.04) + 1.04), 500, 0, this.hastighet, this.jumpLength * (Math.random() * (0.95 - 1.05) + 1.05), this.energiUpptagning * (Math.random() * (0.95 - 1.05) + 1.05), this.delningsEffektivitet * (Math.random() * (0.95 - 1.05) + 1.05)));
-        console.log(cells);
+        cells.push(new Cell(newID, 0, this.x, this.y, this.radius * (Math.random() * (0.95 - 1.05) + 1.05), this.r * (Math.random() * (0.95 - 1.05) + 1.05), this.g * (Math.random() * (0.95 - 1.05) + 1.05), this.b * (Math.random() * (0.95 - 1.05) + 1.05), 500, 0, this.hastighet, this.jumpLength * (Math.random() * (0.95 - 1.05) + 1.05), this.energiUpptagning * (Math.random() * (0.95 - 1.05) + 1.05), this.delningsEffektivitet * (Math.random() * (0.95 - 1.05) + 1.05)));
         this.celldelningsProgress = 0;
         this.energi = 500;
       }
 
       if (this.energi <= 0) {
+        this.dead = true;
         nrOfChildrenCells -= 1;
         document.querySelector(".cells").textContent = nrOfChildrenCells;
+        deadCells.push(this);
         var filteredArray = cells.filter(function (cell) {
           return cell.id !== _this.id;
         });
         cells = filteredArray;
-        console.log(cells);
       }
     }
   }, {
@@ -342,7 +354,7 @@ var Cell = /*#__PURE__*/function () {
       var jumpX = Math.random();
 
       if (jumpX > 0.6666) {
-        if (this.x < window.innerWidth - this.radius) this.x += this.jumpLength;
+        if (this.x < 702 - this.radius) this.x += this.jumpLength;
       }
 
       if (jumpX < 0.3334) {
@@ -350,7 +362,7 @@ var Cell = /*#__PURE__*/function () {
       }
 
       if (jumpY > 0.6666) {
-        if (this.y < window.innerHeight - this.radius) this.y += this.jumpLength;
+        if (this.y < 425 - this.radius) this.y += this.jumpLength;
       }
 
       if (jumpY < 0.3334) {
@@ -385,8 +397,9 @@ var Food = /*#__PURE__*/function () {
   return Food;
 }();
 
-var cell = new Cell("1", 0, 400, 200, 20, 125, 125, 125, 500, 0, 1, 1, 1, 3);
+var cell = new Cell("1", 0, 400, 200, 20, 125, 125, 125, 500, 0, 1, 1, 1, 1);
 var cells = [cell];
+var deadCells = [];
 var foods = [];
 
 for (var food in foodlist) {
@@ -394,11 +407,11 @@ for (var food in foodlist) {
       x = _foodlist$food.x,
       y = _foodlist$food.y,
       radius = _foodlist$food.radius;
-  foods[food] = new Food(x, y, radius, "lightgreen");
+  foods[food] = new Food(x, y, radius, "darkgreen");
 }
 
 function animate() {
-  c.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  c.clearRect(0, 0, 702, 425);
   var animationID = requestAnimationFrame(animate);
   cells.forEach(function (cell) {
     return cell.update();
@@ -406,25 +419,92 @@ function animate() {
   foods.forEach(function (food) {
     return food.draw();
   });
+  var popRadius = 0;
+  var popJump = 0;
+  var popEnergiEff = 0;
+  var popCelldelningsEff = 0;
+  var statparagraph = "";
 
-  if (cells.length > 99) {
-    c.clearRect(0, 0, innerWidth, innerHeight);
-    var _x = 0;
-    var _y = 0;
+  for (Cell in cells) {
+    statparagraph += "Radius: ".concat(cells[Cell].radius.toFixed(2), " Movement: ").concat(cells[Cell].jumpLength.toFixed(2), "\n    Energy-efficiency: ").concat(cells[Cell].energiUpptagning.toFixed(2), "\n    Breeding-efficiancy: ").concat(cells[Cell].delningsEffektivitet.toFixed(2), "   ");
+    popRadius += cells[Cell].radius / cells.length;
+    popJump += cells[Cell].jumpLength / cells.length;
+    popEnergiEff += cells[Cell].energiUpptagning / cells.length;
+    popCelldelningsEff += cells[Cell].delningsEffektivitet / cells.length;
+  }
 
-    for (Cell in cells) {
-      if (Cell % 15 === 0) {
-        _y += 40;
-        _x = 0;
+  document.querySelector(".cellinfo").textContent = statparagraph;
+  var stats = "Lever: Storlek: ".concat(popRadius.toFixed(2), "/20 -- R\xF6rlighet: ").concat(popJump.toFixed(2), "/1 -- Energieffektivitet: ").concat(popEnergiEff.toFixed(2), "/1 -- Celldelningseffektivitet: ").concat(popCelldelningsEff.toFixed(2), "/1");
+  document.querySelector(".stats").textContent = stats;
+  var deadPopRadius = 0;
+  var deadPopJump = 0;
+  var deadPopEnergiEff = 0;
+  var deadPopCelldelningsEff = 0;
+
+  for (Cell in deadCells) {
+    deadPopRadius += deadCells[Cell].radius / deadCells.length;
+    deadPopJump += deadCells[Cell].jumpLength / deadCells.length;
+    deadPopEnergiEff += deadCells[Cell].energiUpptagning / deadCells.length;
+    deadPopCelldelningsEff += deadCells[Cell].delningsEffektivitet / deadCells.length;
+  }
+
+  var deadStats = "D\xF6da: Storlek: ".concat(deadPopRadius.toFixed(2), "/20 -- R\xF6rlighet: ").concat(deadPopJump.toFixed(2), "/1 -- Energieffektivitet: ").concat(deadPopEnergiEff.toFixed(2), "/1 -- Celldelningseffektivitet: ").concat(deadPopCelldelningsEff.toFixed(2), "/1");
+  document.querySelector(".dead-stats").textContent = deadStats;
+
+  if (cells.length > 99 || cells.length === 0) {
+    c.clearRect(0, 0, 702, 425);
+    var allCells = cells.concat(deadCells);
+    allCells.sort(function (a, b) {
+      if (a.id < b.id) return -1;
+      if (a.id > b.id) return 1;
+    });
+    allCells.sort(function (a, b) {
+      if (a.id.split("-").length < b.id.split("-").length) {
+        return -1;
       }
 
-      _x += 40;
-      cells[Cell].x = _x;
-      cells[Cell].y = _y;
-      cells[Cell].energi = 0;
-      cells[Cell].celldelningsProgress = 0;
-      cells[Cell].draw();
-    }
+      if (a.id.split("-").length > b.id.split("-").length) {
+        return +1;
+      }
+    });
+    var lastGeneration = 0;
+    var lastChildren = 0;
+
+    var _x = 702 / 2 - 22.5;
+
+    var _y = 30;
+
+    for (Cell in allCells) {
+      allCells[Cell].radius = allCells[Cell].radius * 0.3;
+      var generation = allCells[Cell].id.split("-").length - 1;
+      _y = 15 * generation + 30;
+      _x += 15;
+
+      if (generation !== lastGeneration) {
+        _x = 702 / 2 - 7.5 * lastChildren;
+        lastGeneration = generation;
+        lastChildren = 0;
+      }
+
+      lastChildren += allCells[Cell].children;
+      allCells[Cell].x = _x;
+      allCells[Cell].y = _y;
+      allCells[Cell].energi = 0;
+      allCells[Cell].celldelningsProgress = 0;
+      allCells[Cell].draw();
+    } // for (Cell in cells) {
+    //   if (Cell % 15 === 0) {
+    //     y += 40;
+    //     x = 0;
+    //   }
+    //   x += 40;
+    //   cells[Cell].x = x;
+    //   cells[Cell].y = y;
+    //   cells[Cell].energi = 0;
+    //   cells[Cell].celldelningsProgress = 0;
+    //   cells[Cell].draw();
+    // }
+
 
     cancelAnimationFrame(animationID);
   }
@@ -459,7 +539,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51747" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49834" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
