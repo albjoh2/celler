@@ -38,7 +38,7 @@ class Cell {
     this.r = r;
     this.g = g;
     this.b = b;
-    this.color = `rgba(${r},${g},${b},0.4)`;
+    this.color = `rgba(${r},${g},${b},0.8)`;
     this.energi = energi;
     this.celldelningsProgress = celldelningsProgress;
     this.hastighet = hastighet;
@@ -85,10 +85,10 @@ class Cell {
     this.draw();
 
     if (this.energi >= 0) {
-      this.energi -= 0.2;
+      this.energi -= 0.3;
     }
     if (this.celldelningsProgress >= 0) {
-      this.celldelningsProgress -= 0.1;
+      this.celldelningsProgress -= 0.3;
     }
     for (let food in foods) {
       const { x, y, radius } = foods[food];
@@ -104,12 +104,12 @@ class Cell {
       if (this.x < x + this.radius && x - this.radius < this.x) {
         if (this.y < y + this.radius && y - this.radius < this.y) {
           if (foods[food].radius >= 0.1) {
-            foods[food].radius -= 0.01;
+            foods[food].radius -= 0.006;
           }
           if (this.energi >= 1000) {
             this.celldelningsProgress += this.delningsEffektivitet * radius;
           } else if (foods[food].radius > 1.1)
-            this.energi += this.energiUpptagning * radius - 0.13;
+            this.energi += this.energiUpptagning * radius;
         }
       }
     }
@@ -125,10 +125,10 @@ class Cell {
           0,
           this.x,
           this.y,
-          this.radius * (Math.random() * (0.95 - 1.05) + 1.05),
-          this.r * (Math.random() * (0.95 - 1.05) + 1.05),
-          this.g * (Math.random() * (0.95 - 1.05) + 1.05),
-          this.b * (Math.random() * (0.95 - 1.05) + 1.05),
+          this.radius * (Math.random() * (0.9 - 1.1) + 1.1),
+          this.r * (Math.random() * (0.9 - 1.1) + 1.1),
+          this.g * (Math.random() * (0.9 - 1.1) + 1.1),
+          this.b * (Math.random() * (0.9 - 1.1) + 1.1),
           500,
           0,
           this.hastighet,
@@ -220,14 +220,14 @@ function animate() {
     popEnergiEff += cells[Cell].energiUpptagning / cells.length;
     popCelldelningsEff += cells[Cell].delningsEffektivitet / cells.length;
   }
-  document.querySelector(".cellinfo").textContent = statparagraph;
-  let stats = `Lever: Storlek: ${popRadius.toFixed(
+  document.querySelector(".cell-statistik").textContent = statparagraph;
+  let stats = `Alive: Size: ${popRadius.toFixed(
     2
-  )}/20 -- Rörlighet: ${popJump.toFixed(
+  )}/20 -- Movement: ${popJump.toFixed(
     2
-  )}/1 -- Energieffektivitet: ${popEnergiEff.toFixed(
+  )}/1 -- Energy efficiency: ${popEnergiEff.toFixed(
     2
-  )}/1 -- Celldelningseffektivitet: ${popCelldelningsEff.toFixed(2)}/1`;
+  )}/1 -- Breeding efficiency: ${popCelldelningsEff.toFixed(2)}/1`;
   document.querySelector(".stats").textContent = stats;
 
   let deadPopRadius = 0;
@@ -241,16 +241,16 @@ function animate() {
     deadPopCelldelningsEff +=
       deadCells[Cell].delningsEffektivitet / deadCells.length;
   }
-  let deadStats = `Döda: Storlek: ${deadPopRadius.toFixed(
+  let deadStats = `Dead: Size: ${deadPopRadius.toFixed(
     2
-  )}/20 -- Rörlighet: ${deadPopJump.toFixed(
+  )}/20 -- Movement: ${deadPopJump.toFixed(
     2
-  )}/1 -- Energieffektivitet: ${deadPopEnergiEff.toFixed(
+  )}/1 -- Energy efficiency: ${deadPopEnergiEff.toFixed(
     2
-  )}/1 -- Celldelningseffektivitet: ${deadPopCelldelningsEff.toFixed(2)}/1`;
+  )}/1 -- Breeding efficiency: ${deadPopCelldelningsEff.toFixed(2)}/1`;
   document.querySelector(".dead-stats").textContent = deadStats;
 
-  if (cells.length > 99 || cells.length === 0) {
+  if (cells.length > 19 || cells.length === 0) {
     c.clearRect(0, 0, 702, 425);
 
     let allCells = cells.concat(deadCells);
@@ -284,6 +284,7 @@ function animate() {
         lastGeneration = generation;
         lastChildren = 0;
       }
+      console.log(allCells);
       lastChildren += allCells[Cell].children;
       allCells[Cell].x = x;
       allCells[Cell].y = y;
@@ -292,19 +293,6 @@ function animate() {
       allCells[Cell].draw();
     }
 
-    // for (Cell in cells) {
-    //   if (Cell % 15 === 0) {
-    //     y += 40;
-    //     x = 0;
-    //   }
-    //   x += 40;
-    //   cells[Cell].x = x;
-    //   cells[Cell].y = y;
-
-    //   cells[Cell].energi = 0;
-    //   cells[Cell].celldelningsProgress = 0;
-    //   cells[Cell].draw();
-    // }
     cancelAnimationFrame(animationID);
   }
 }
