@@ -8,8 +8,7 @@ canvas.height = 425;
 
 const c = canvas.getContext("2d");
 
-let nrOfChildrenCells = 1;
-document.querySelector(".cells").textContent = nrOfChildrenCells;
+document.querySelector(".cells").textContent = 1;
 
 const foodlist = genereraMat(c);
 
@@ -23,9 +22,9 @@ class Cell {
     r,
     g,
     b,
+    o,
     energi,
     celldelningsProgress,
-    hastighet,
     jumpLength,
     energiUpptagning,
     delningsEffektivitet
@@ -38,10 +37,10 @@ class Cell {
     this.r = r;
     this.g = g;
     this.b = b;
-    this.color = `rgba(${r},${g},${b},0.8)`;
+    this.o = o;
+    this.color = `rgba(${r},${g},${b},${o})`;
     this.energi = energi;
     this.celldelningsProgress = celldelningsProgress;
-    this.hastighet = hastighet;
     this.jumpLength = jumpLength;
     this.energiUpptagning = energiUpptagning;
     this.delningsEffektivitet = delningsEffektivitet;
@@ -51,16 +50,20 @@ class Cell {
   draw() {
     c.beginPath();
     c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+
+    if (!this.dead) {
+      if (this.children > 0) {
+        c.strokeStyle = "black";
+      } else c.strokeStyle = "green";
+    } else {
+      if (this.children === 0) {
+        c.strokeStyle = "red";
+      } else c.strokeStyle = "yellow";
+    }
+    c.stroke();
+
     c.fillStyle = this.color;
     c.fill();
-    if (!this.dead) {
-      c.strokestyle = "yellow";
-      c.stroke();
-      if (this.children === 0) {
-        c.strokestyle = "red";
-        c.stroke();
-      }
-    }
 
     c.beginPath();
     c.fillStyle = "#3df322";
@@ -94,17 +97,17 @@ class Cell {
       const { x, y, radius } = foods[food];
       //TODO Gör maten mindre när man äter av den.
       foods.forEach((food) => {
-        if (food.radius < 0.5) food.radius += 0.0000005;
-        if (food.radius < 1) food.radius += 0.00000005;
-        if (food.radius < 2) food.radius += 0.000000005;
-        if (food.radius < 3) food.radius += 0.000000005;
-        food.radius += 0.000000005;
+        if (food.radius < 1) food.radius += 0.0000005;
+        if (food.radius < 3) food.radius += 0.00000005;
+        if (food.radius < 5) food.radius += 0.000000005;
+        if (food.radius < 7) food.radius += 0.0000000005;
+        if (food.radius < 10) food.radius += 0.00000000005;
       });
 
       if (this.x < x + this.radius && x - this.radius < this.x) {
         if (this.y < y + this.radius && y - this.radius < this.y) {
-          if (foods[food].radius >= 0.1) {
-            foods[food].radius -= 0.006;
+          if (foods[food].radius >= 0.05) {
+            foods[food].radius -= 0.008;
           }
           if (this.energi >= 1000) {
             this.celldelningsProgress += this.delningsEffektivitet * radius;
@@ -115,41 +118,38 @@ class Cell {
     }
 
     if (this.celldelningsProgress > 1000) {
-      nrOfChildrenCells += 1;
-      document.querySelector(".cells").textContent = nrOfChildrenCells;
       this.children++;
-      const newID = `${this.id}-${this.children}`;
+      const newID = [...this.id, this.children];
       cells.push(
         new Cell(
           newID,
           0,
           this.x,
           this.y,
-          this.radius * (Math.random() * (0.9 - 1.1) + 1.1),
-          this.r * (Math.random() * (0.9 - 1.1) + 1.1),
-          this.g * (Math.random() * (0.9 - 1.1) + 1.1),
-          this.b * (Math.random() * (0.9 - 1.1) + 1.1),
+          this.radius * (Math.random() * (1.1 - 0.9) + 0.9),
+          this.r * (Math.random() * (1.1 - 0.9) + 0.9),
+          this.g * (Math.random() * (1.1 - 0.9) + 0.9),
+          this.b * (Math.random() * (1.1 - 0.9) + 0.9),
+          this.o * (Math.random() * (1.1 - 0.9) + 0.9),
           500,
           0,
-          this.hastighet,
           this.jumpLength * (Math.random() * (0.95 - 1.05) + 1.05),
           this.energiUpptagning * (Math.random() * (0.95 - 1.05) + 1.05),
           this.delningsEffektivitet * (Math.random() * (0.95 - 1.05) + 1.05)
         )
       );
 
+      document.querySelector(".cells").textContent = cells.length;
       this.celldelningsProgress = 0;
       this.energi = 500;
     }
 
     if (this.energi <= 0) {
       this.dead = true;
-      nrOfChildrenCells -= 1;
-      document.querySelector(".cells").textContent = nrOfChildrenCells;
       deadCells.push(this);
       let filteredArray = cells.filter((cell) => cell.id !== this.id);
-
       cells = filteredArray;
+      document.querySelector(".cells").textContent = cells.length;
     }
   }
 
@@ -187,7 +187,22 @@ class Food {
   }
 }
 
-const cell = new Cell("1", 0, 400, 200, 20, 125, 125, 125, 500, 0, 1, 1, 1, 1);
+const cell = new Cell(
+  [1],
+  0,
+  400,
+  200,
+  10,
+  125,
+  125,
+  125,
+  0.5,
+  500,
+  0,
+  1,
+  1,
+  1
+);
 
 let cells = [cell];
 let deadCells = [];
@@ -223,11 +238,11 @@ function animate() {
   document.querySelector(".cell-statistik").textContent = statparagraph;
   let stats = `Alive: Size: ${popRadius.toFixed(
     2
-  )}/20 -- Movement: ${popJump.toFixed(
+  )} -- Movement: ${popJump.toFixed(
     2
-  )}/1 -- Energy efficiency: ${popEnergiEff.toFixed(
+  )} -- Energy efficiency: ${popEnergiEff.toFixed(
     2
-  )}/1 -- Breeding efficiency: ${popCelldelningsEff.toFixed(2)}/1`;
+  )} -- Breeding efficiency: ${popCelldelningsEff.toFixed(2)}`;
   document.querySelector(".stats").textContent = stats;
 
   let deadPopRadius = 0;
@@ -243,16 +258,17 @@ function animate() {
   }
   let deadStats = `Dead: Size: ${deadPopRadius.toFixed(
     2
-  )}/20 -- Movement: ${deadPopJump.toFixed(
+  )} -- Movement: ${deadPopJump.toFixed(
     2
-  )}/1 -- Energy efficiency: ${deadPopEnergiEff.toFixed(
+  )} -- Energy efficiency: ${deadPopEnergiEff.toFixed(
     2
-  )}/1 -- Breeding efficiency: ${deadPopCelldelningsEff.toFixed(2)}/1`;
+  )} -- Breeding efficiency: ${deadPopCelldelningsEff.toFixed(2)}`;
   document.querySelector(".dead-stats").textContent = deadStats;
 
-  if (cells.length > 19 || cells.length === 0) {
+  if (cells.length > 99 || cells.length === 0) {
     c.clearRect(0, 0, 702, 425);
 
+    //Start of test
     let allCells = cells.concat(deadCells);
 
     allCells.sort((a, b) => {
@@ -260,32 +276,41 @@ function animate() {
       if (a.id > b.id) return 1;
     });
     allCells.sort((a, b) => {
-      if (a.id.split("-").length < b.id.split("-").length) {
+      if (a.id.length < b.id.length) {
         return -1;
       }
-      if (a.id.split("-").length > b.id.split("-").length) {
+      if (a.id.length > b.id.length) {
         return +1;
       }
     });
 
-    let lastGeneration = 0;
-    let lastChildren = 0;
-    let x = 702 / 2 - 22.5;
     let y = 30;
-
+    let x = 0;
+    let lastCellsGeneration = 0;
+    let pappasGenerationsBarn = 1;
+    let lastCellsPapi = 1;
+    console.log(allCells);
     for (Cell in allCells) {
-      allCells[Cell].radius = allCells[Cell].radius * 0.3;
-      let generation = allCells[Cell].id.split("-").length - 1;
-      y = 15 * generation + 30;
+      let generation = allCells[Cell].id.length;
+      allCells[Cell].radius *= 0.5;
+      y = 15 * generation;
       x += 15;
 
-      if (generation !== lastGeneration) {
-        x = 702 / 2 - 7.5 * lastChildren;
-        lastGeneration = generation;
-        lastChildren = 0;
+      if (
+        JSON.stringify(allCells[Cell].id.slice(0, -1)) !==
+        JSON.stringify(lastCellsPapi)
+      ) {
+        x += 10;
       }
-      console.log(allCells);
-      lastChildren += allCells[Cell].children;
+
+      if (lastCellsGeneration !== generation) {
+        x = 702 / 2 - 15 * (pappasGenerationsBarn / 2) + 12.5;
+        pappasGenerationsBarn = 0;
+      }
+
+      lastCellsPapi = allCells[Cell].id.slice(0, -1);
+      pappasGenerationsBarn += allCells[Cell].children;
+      lastCellsGeneration = generation;
       allCells[Cell].x = x;
       allCells[Cell].y = y;
       allCells[Cell].energi = 0;
@@ -298,3 +323,11 @@ function animate() {
 }
 
 animate();
+
+//                             1
+//   1,1         1,2          1,3        1,4           1,5
+//  1,1,1   1,2,1   1,2,2               1,4,1  1,5,1  1,5,2  1,5,3
+
+//1. se till att alla rader är centrerade horrisontelt genom att sätta x till mitten och subtrahera med bredden på halva nästa rad när det är generationsbyte - KLAR
+//2. Se till att syskon hamnar närmare varandra än kusiner
+//3. Se till att barnen hamnar under sina föräldrar

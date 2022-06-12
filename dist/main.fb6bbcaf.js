@@ -200,8 +200,8 @@ exports.genereraMat = void 0;
 var genereraMat = function genereraMat(c) {
   var foodlist = [];
 
-  for (var i = 0; i < 500; i++) {
-    var radius = Math.random() * (3 - 1) + 1;
+  for (var i = 0; i < 253; i++) {
+    var radius = Math.random() * (7 - 0) + 0;
     var x = Math.random() * (702 - radius) + radius;
     var y = Math.random() * (425 - radius) + radius;
     foodlist.push({
@@ -211,7 +211,6 @@ var genereraMat = function genereraMat(c) {
     });
   }
 
-  console.log(foodlist);
   return foodlist;
 };
 
@@ -223,6 +222,18 @@ require("../scss/main.scss");
 
 var _foodCreator = require("./object-creators/food-creator");
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -233,12 +244,11 @@ var canvas = document.querySelector(".plan");
 canvas.width = 702;
 canvas.height = 425;
 var c = canvas.getContext("2d");
-var nrOfChildrenCells = 1;
-document.querySelector(".cells").textContent = nrOfChildrenCells;
+document.querySelector(".cells").textContent = 1;
 var foodlist = (0, _foodCreator.genereraMat)(c);
 
 var Cell = /*#__PURE__*/function () {
-  function Cell(id, children, x, y, radius, r, g, b, energi, celldelningsProgress, hastighet, jumpLength, energiUpptagning, delningsEffektivitet) {
+  function Cell(id, children, x, y, radius, r, g, b, o, energi, celldelningsProgress, jumpLength, energiUpptagning, delningsEffektivitet) {
     _classCallCheck(this, Cell);
 
     this.id = id;
@@ -249,10 +259,10 @@ var Cell = /*#__PURE__*/function () {
     this.r = r;
     this.g = g;
     this.b = b;
-    this.color = "rgba(".concat(r, ",").concat(g, ",").concat(b, ",0.8)");
+    this.o = o;
+    this.color = "rgba(".concat(r, ",").concat(g, ",").concat(b, ",").concat(o, ")");
     this.energi = energi;
     this.celldelningsProgress = celldelningsProgress;
-    this.hastighet = hastighet;
     this.jumpLength = jumpLength;
     this.energiUpptagning = energiUpptagning;
     this.delningsEffektivitet = delningsEffektivitet;
@@ -264,19 +274,20 @@ var Cell = /*#__PURE__*/function () {
     value: function draw() {
       c.beginPath();
       c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-      c.fillStyle = this.color;
-      c.fill();
 
       if (!this.dead) {
-        c.strokestyle = "yellow";
-        c.stroke();
-
+        if (this.children > 0) {
+          c.strokeStyle = "black";
+        } else c.strokeStyle = "green";
+      } else {
         if (this.children === 0) {
-          c.strokestyle = "red";
-          c.stroke();
-        }
+          c.strokeStyle = "red";
+        } else c.strokeStyle = "yellow";
       }
 
+      c.stroke();
+      c.fillStyle = this.color;
+      c.fill();
       c.beginPath();
       c.fillStyle = "#3df322";
       c.fillRect(this.x - this.radius, this.y + this.radius * 1.5, this.radius * 2 / 1000 * this.celldelningsProgress, 3);
@@ -306,17 +317,17 @@ var Cell = /*#__PURE__*/function () {
             radius = _foods$food.radius; //TODO Gör maten mindre när man äter av den.
 
         foods.forEach(function (food) {
-          if (food.radius < 0.5) food.radius += 0.0000005;
-          if (food.radius < 1) food.radius += 0.00000005;
-          if (food.radius < 2) food.radius += 0.000000005;
-          if (food.radius < 3) food.radius += 0.000000005;
-          food.radius += 0.000000005;
+          if (food.radius < 1) food.radius += 0.0000005;
+          if (food.radius < 3) food.radius += 0.00000005;
+          if (food.radius < 5) food.radius += 0.000000005;
+          if (food.radius < 7) food.radius += 0.0000000005;
+          if (food.radius < 10) food.radius += 0.00000000005;
         });
 
         if (this.x < x + this.radius && x - this.radius < this.x) {
           if (this.y < y + this.radius && y - this.radius < this.y) {
-            if (foods[food].radius >= 0.1) {
-              foods[food].radius -= 0.006;
+            if (foods[food].radius >= 0.05) {
+              foods[food].radius -= 0.008;
             }
 
             if (this.energi >= 1000) {
@@ -327,24 +338,22 @@ var Cell = /*#__PURE__*/function () {
       }
 
       if (this.celldelningsProgress > 1000) {
-        nrOfChildrenCells += 1;
-        document.querySelector(".cells").textContent = nrOfChildrenCells;
         this.children++;
-        var newID = "".concat(this.id, "-").concat(this.children);
-        cells.push(new Cell(newID, 0, this.x, this.y, this.radius * (Math.random() * (0.9 - 1.1) + 1.1), this.r * (Math.random() * (0.9 - 1.1) + 1.1), this.g * (Math.random() * (0.9 - 1.1) + 1.1), this.b * (Math.random() * (0.9 - 1.1) + 1.1), 500, 0, this.hastighet, this.jumpLength * (Math.random() * (0.95 - 1.05) + 1.05), this.energiUpptagning * (Math.random() * (0.95 - 1.05) + 1.05), this.delningsEffektivitet * (Math.random() * (0.95 - 1.05) + 1.05)));
+        var newID = [].concat(_toConsumableArray(this.id), [this.children]);
+        cells.push(new Cell(newID, 0, this.x, this.y, this.radius * (Math.random() * (1.1 - 0.9) + 0.9), this.r * (Math.random() * (1.1 - 0.9) + 0.9), this.g * (Math.random() * (1.1 - 0.9) + 0.9), this.b * (Math.random() * (1.1 - 0.9) + 0.9), this.o * (Math.random() * (1.1 - 0.9) + 0.9), 500, 0, this.jumpLength * (Math.random() * (0.95 - 1.05) + 1.05), this.energiUpptagning * (Math.random() * (0.95 - 1.05) + 1.05), this.delningsEffektivitet * (Math.random() * (0.95 - 1.05) + 1.05)));
+        document.querySelector(".cells").textContent = cells.length;
         this.celldelningsProgress = 0;
         this.energi = 500;
       }
 
       if (this.energi <= 0) {
         this.dead = true;
-        nrOfChildrenCells -= 1;
-        document.querySelector(".cells").textContent = nrOfChildrenCells;
         deadCells.push(this);
         var filteredArray = cells.filter(function (cell) {
           return cell.id !== _this.id;
         });
         cells = filteredArray;
+        document.querySelector(".cells").textContent = cells.length;
       }
     }
   }, {
@@ -397,7 +406,7 @@ var Food = /*#__PURE__*/function () {
   return Food;
 }();
 
-var cell = new Cell("1", 0, 400, 200, 20, 125, 125, 125, 500, 0, 1, 1, 1, 1);
+var cell = new Cell([1], 0, 400, 200, 10, 125, 125, 125, 0.5, 500, 0, 1, 1, 1);
 var cells = [cell];
 var deadCells = [];
 var foods = [];
@@ -434,7 +443,7 @@ function animate() {
   }
 
   document.querySelector(".cell-statistik").textContent = statparagraph;
-  var stats = "Alive: Size: ".concat(popRadius.toFixed(2), "/20 -- Movement: ").concat(popJump.toFixed(2), "/1 -- Energy efficiency: ").concat(popEnergiEff.toFixed(2), "/1 -- Breeding efficiency: ").concat(popCelldelningsEff.toFixed(2), "/1");
+  var stats = "Alive: Size: ".concat(popRadius.toFixed(2), " -- Movement: ").concat(popJump.toFixed(2), " -- Energy efficiency: ").concat(popEnergiEff.toFixed(2), " -- Breeding efficiency: ").concat(popCelldelningsEff.toFixed(2));
   document.querySelector(".stats").textContent = stats;
   var deadPopRadius = 0;
   var deadPopJump = 0;
@@ -448,46 +457,51 @@ function animate() {
     deadPopCelldelningsEff += deadCells[Cell].delningsEffektivitet / deadCells.length;
   }
 
-  var deadStats = "Dead: Size: ".concat(deadPopRadius.toFixed(2), "/20 -- Movement: ").concat(deadPopJump.toFixed(2), "/1 -- Energy efficiency: ").concat(deadPopEnergiEff.toFixed(2), "/1 -- Breeding efficiency: ").concat(deadPopCelldelningsEff.toFixed(2), "/1");
+  var deadStats = "Dead: Size: ".concat(deadPopRadius.toFixed(2), " -- Movement: ").concat(deadPopJump.toFixed(2), " -- Energy efficiency: ").concat(deadPopEnergiEff.toFixed(2), " -- Breeding efficiency: ").concat(deadPopCelldelningsEff.toFixed(2));
   document.querySelector(".dead-stats").textContent = deadStats;
 
-  if (cells.length > 19 || cells.length === 0) {
-    c.clearRect(0, 0, 702, 425);
+  if (cells.length > 99 || cells.length === 0) {
+    c.clearRect(0, 0, 702, 425); //Start of test
+
     var allCells = cells.concat(deadCells);
     allCells.sort(function (a, b) {
       if (a.id < b.id) return -1;
       if (a.id > b.id) return 1;
     });
     allCells.sort(function (a, b) {
-      if (a.id.split("-").length < b.id.split("-").length) {
+      if (a.id.length < b.id.length) {
         return -1;
       }
 
-      if (a.id.split("-").length > b.id.split("-").length) {
+      if (a.id.length > b.id.length) {
         return +1;
       }
     });
-    var lastGeneration = 0;
-    var lastChildren = 0;
-
-    var _x = 702 / 2 - 22.5;
-
     var _y = 30;
+    var _x = 0;
+    var lastCellsGeneration = 0;
+    var pappasGenerationsBarn = 1;
+    var lastCellsPapi = 1;
+    console.log(allCells);
 
     for (Cell in allCells) {
-      allCells[Cell].radius = allCells[Cell].radius * 0.3;
-      var generation = allCells[Cell].id.split("-").length - 1;
-      _y = 15 * generation + 30;
+      var generation = allCells[Cell].id.length;
+      allCells[Cell].radius *= 0.5;
+      _y = 15 * generation;
       _x += 15;
 
-      if (generation !== lastGeneration) {
-        _x = 702 / 2 - 7.5 * lastChildren;
-        lastGeneration = generation;
-        lastChildren = 0;
+      if (JSON.stringify(allCells[Cell].id.slice(0, -1)) !== JSON.stringify(lastCellsPapi)) {
+        _x += 10;
       }
 
-      console.log(allCells);
-      lastChildren += allCells[Cell].children;
+      if (lastCellsGeneration !== generation) {
+        _x = 702 / 2 - 15 * (pappasGenerationsBarn / 2) + 12.5;
+        pappasGenerationsBarn = 0;
+      }
+
+      lastCellsPapi = allCells[Cell].id.slice(0, -1);
+      pappasGenerationsBarn += allCells[Cell].children;
+      lastCellsGeneration = generation;
       allCells[Cell].x = _x;
       allCells[Cell].y = _y;
       allCells[Cell].energi = 0;
@@ -499,7 +513,12 @@ function animate() {
   }
 }
 
-animate();
+animate(); //                             1
+//   1,1         1,2          1,3        1,4           1,5
+//  1,1,1   1,2,1   1,2,2               1,4,1  1,5,1  1,5,2  1,5,3
+//1. se till att alla rader är centrerade horrisontelt genom att sätta x till mitten och subtrahera med bredden på halva nästa rad när det är generationsbyte - KLAR
+//2. Se till att syskon hamnar närmare varandra än kusiner
+//3. Se till att barnen hamnar under sina föräldrar
 },{"../scss/main.scss":"scss/main.scss","./object-creators/food-creator":"js/object-creators/food-creator.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -528,7 +547,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49797" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54976" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
