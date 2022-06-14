@@ -200,8 +200,8 @@ exports.genereraMat = void 0;
 var genereraMat = function genereraMat(c) {
   var foodlist = [];
 
-  for (var i = 0; i < 253; i++) {
-    var radius = Math.random() * (7 - 0) + 0;
+  for (var i = 0; i < 300; i++) {
+    var radius = Math.random() * (5 - 0) + 0;
     var x = Math.random() * (702 - radius) + radius;
     var y = Math.random() * (425 - radius) + radius;
     foodlist.push({
@@ -303,7 +303,7 @@ var Cell = /*#__PURE__*/function () {
       this.draw();
 
       if (this.energi >= 0) {
-        this.energi -= 0.3;
+        this.energi -= 0.6;
       }
 
       if (this.celldelningsProgress >= 0) {
@@ -327,12 +327,12 @@ var Cell = /*#__PURE__*/function () {
         if (this.x < x + this.radius && x - this.radius < this.x) {
           if (this.y < y + this.radius && y - this.radius < this.y) {
             if (foods[food].radius >= 0.05) {
-              foods[food].radius -= 0.008;
+              foods[food].radius -= 0.005;
             }
 
             if (this.energi >= 1000) {
-              this.celldelningsProgress += this.delningsEffektivitet * radius;
-            } else if (foods[food].radius > 1.1) this.energi += this.energiUpptagning * radius;
+              this.celldelningsProgress += this.delningsEffektivitet * radius * 1.5;
+            } else if (foods[food].radius > 1.1) this.energi += this.energiUpptagning * radius * 2;
           }
         }
       }
