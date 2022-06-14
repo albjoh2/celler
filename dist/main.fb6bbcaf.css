@@ -31,11 +31,11 @@ h2 {
   margin-left: 8px;
   bottom: -20px;
   z-index: 1;
-  font-size: 17px;
+  font-size: 16px;
 }
 
 div {
-  width: 540px;
+  width: 580px;
 }
 
 .dead-stats {

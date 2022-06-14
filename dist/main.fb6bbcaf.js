@@ -200,8 +200,8 @@ exports.genereraMat = void 0;
 var genereraMat = function genereraMat(c) {
   var foodlist = [];
 
-  for (var i = 0; i < 300; i++) {
-    var radius = Math.random() * (5 - 0) + 0;
+  for (var i = 0; i < 500; i++) {
+    var radius = Math.random() * (3 - 0) + 0;
     var x = Math.random() * (702 - radius) + radius;
     var y = Math.random() * (425 - radius) + radius;
     foodlist.push({
@@ -215,12 +215,97 @@ var genereraMat = function genereraMat(c) {
 };
 
 exports.genereraMat = genereraMat;
+},{}],"js/controls.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _classPrivateMethodInitSpec(obj, privateSet) { _checkPrivateRedeclaration(obj, privateSet); privateSet.add(obj); }
+
+function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
+
+function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
+
+var _addKeyboardListeners = /*#__PURE__*/new WeakSet();
+
+var Controls = /*#__PURE__*/_createClass(function Controls() {
+  _classCallCheck(this, Controls);
+
+  _classPrivateMethodInitSpec(this, _addKeyboardListeners);
+
+  this.forward = false;
+  this.reverse = false;
+  this.left = false;
+  this.right = false;
+
+  _classPrivateMethodGet(this, _addKeyboardListeners, _addKeyboardListeners2).call(this);
+});
+
+function _addKeyboardListeners2() {
+  var _this = this;
+
+  document.onkeydown = function (event) {
+    switch (event.key) {
+      case "ArrowLeft":
+        _this.left = true;
+        break;
+
+      case "ArrowRight":
+        _this.right = true;
+        break;
+
+      case "ArrowUp":
+        _this.forward = true;
+        break;
+
+      case "ArrowDown":
+        _this.reverse = true;
+        break;
+    }
+  };
+
+  document.onkeyup = function (event) {
+    switch (event.key) {
+      case "ArrowLeft":
+        _this.left = false;
+        break;
+
+      case "ArrowRight":
+        _this.right = false;
+        break;
+
+      case "ArrowUp":
+        _this.forward = false;
+        break;
+
+      case "ArrowDown":
+        _this.reverse = false;
+        break;
+    }
+  };
+}
+
+var _default = Controls;
+exports.default = _default;
 },{}],"js/main.js":[function(require,module,exports) {
 "use strict";
 
 require("../scss/main.scss");
 
 var _foodCreator = require("./object-creators/food-creator");
+
+var _controls = _interopRequireDefault(require("./controls"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
@@ -240,6 +325,12 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
+function _classPrivateMethodInitSpec(obj, privateSet) { _checkPrivateRedeclaration(obj, privateSet); privateSet.add(obj); }
+
+function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
+
+function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
+
 var canvas = document.querySelector(".plan");
 canvas.width = 702;
 canvas.height = 425;
@@ -247,14 +338,25 @@ var c = canvas.getContext("2d");
 document.querySelector(".cells").textContent = 1;
 var foodlist = (0, _foodCreator.genereraMat)(c);
 
+var _move = /*#__PURE__*/new WeakSet();
+
+var _jump = /*#__PURE__*/new WeakSet();
+
 var Cell = /*#__PURE__*/function () {
-  function Cell(id, children, x, y, radius, r, g, b, o, energi, celldelningsProgress, jumpLength, energiUpptagning, delningsEffektivitet) {
+  function Cell(id, children, x, y, maxSpeed, speed, acceleration, orientation, radius, r, g, b, o, energi, celldelningsProgress, jumpLength, energiUpptagning, delningsEffektivitet) {
     _classCallCheck(this, Cell);
+
+    _classPrivateMethodInitSpec(this, _jump);
+
+    _classPrivateMethodInitSpec(this, _move);
 
     this.id = id;
     this.children = children;
     this.x = x;
     this.y = y;
+    this.maxSpeed = maxSpeed;
+    this.acceleration = acceleration;
+    this.orientation = orientation;
     this.radius = radius;
     this.r = r;
     this.g = g;
@@ -265,15 +367,21 @@ var Cell = /*#__PURE__*/function () {
     this.celldelningsProgress = celldelningsProgress;
     this.jumpLength = jumpLength;
     this.energiUpptagning = energiUpptagning;
-    this.delningsEffektivitet = delningsEffektivitet;
+    this.delningsEffektivitet = delningsEffektivitet; // this.speed = 0;
+
+    this.speed = speed;
     this.dead = false;
+    this.controls = new _controls.default();
   }
 
   _createClass(Cell, [{
     key: "draw",
     value: function draw() {
+      c.save();
+      c.translate(this.x, this.y);
+      c.rotate(-this.orientation);
       c.beginPath();
-      c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+      c.arc(0, 0, this.radius, 0, Math.PI * 2, false);
 
       if (!this.dead) {
         if (this.children > 0) {
@@ -290,16 +398,20 @@ var Cell = /*#__PURE__*/function () {
       c.fill();
       c.beginPath();
       c.fillStyle = "#3df322";
-      c.fillRect(this.x - this.radius, this.y + this.radius * 1.5, this.radius * 2 / 1000 * this.celldelningsProgress, 3);
+      c.fillRect(-this.radius, +this.radius * 1.5, this.radius * 2 / 1000 * this.celldelningsProgress, 3);
       c.fillStyle = "#aaf322";
-      c.fillRect(this.x - this.radius, this.y + this.radius * 1.1, this.radius * 2 / 1000 * this.energi, 3);
+      c.fillRect(-this.radius, +this.radius * 1.1, this.radius * 2 / 1000 * this.energi, 3);
+      c.restore();
     }
   }, {
     key: "update",
     value: function update() {
       var _this = this;
 
-      this.jump();
+      _classPrivateMethodGet(this, _move, _move2).call(this);
+
+      _classPrivateMethodGet(this, _jump, _jump2).call(this);
+
       this.draw();
 
       if (this.energi >= 0) {
@@ -314,15 +426,7 @@ var Cell = /*#__PURE__*/function () {
         var _foods$food = foods[food],
             x = _foods$food.x,
             y = _foods$food.y,
-            radius = _foods$food.radius; //TODO Gör maten mindre när man äter av den.
-
-        foods.forEach(function (food) {
-          if (food.radius < 1) food.radius += 0.0000005;
-          if (food.radius < 3) food.radius += 0.00000005;
-          if (food.radius < 5) food.radius += 0.000000005;
-          if (food.radius < 7) food.radius += 0.0000000005;
-          if (food.radius < 10) food.radius += 0.00000000005;
-        });
+            radius = _foods$food.radius;
 
         if (this.x < x + this.radius && x - this.radius < this.x) {
           if (this.y < y + this.radius && y - this.radius < this.y) {
@@ -340,7 +444,7 @@ var Cell = /*#__PURE__*/function () {
       if (this.celldelningsProgress > 1000) {
         this.children++;
         var newID = [].concat(_toConsumableArray(this.id), [this.children]);
-        cells.push(new Cell(newID, 0, this.x, this.y, this.radius * (Math.random() * (1.1 - 0.9) + 0.9), this.r * (Math.random() * (1.1 - 0.9) + 0.9), this.g * (Math.random() * (1.1 - 0.9) + 0.9), this.b * (Math.random() * (1.1 - 0.9) + 0.9), this.o * (Math.random() * (1.1 - 0.9) + 0.9), 500, 0, this.jumpLength * (Math.random() * (0.95 - 1.05) + 1.05), this.energiUpptagning * (Math.random() * (0.95 - 1.05) + 1.05), this.delningsEffektivitet * (Math.random() * (0.95 - 1.05) + 1.05)));
+        cells.push(new Cell(newID, 0, this.x, this.y, this.maxSpeed * (Math.random() * (1.1 - 0.9) + 0.9), this.speed * (Math.random() * (1.1 - 0.9) + 0.9), this.acceleration * (Math.random() * (1.1 - 0.9) + 0.9), Math.random() * (10 - 0) + 0, this.radius * (Math.random() * (1.1 - 0.9) + 0.9), this.r * (Math.random() * (1.1 - 0.9) + 0.9), this.g * (Math.random() * (1.1 - 0.9) + 0.9), this.b * (Math.random() * (1.1 - 0.9) + 0.9), this.o * (Math.random() * (1.1 - 0.9) + 0.9), 500, 0, this.jumpLength * (Math.random() * (0.95 - 1.05) + 1.05), this.energiUpptagning * (Math.random() * (0.95 - 1.05) + 1.05), this.delningsEffektivitet * (Math.random() * (0.95 - 1.05) + 1.05)));
         document.querySelector(".cells").textContent = cells.length;
         this.celldelningsProgress = 0;
         this.energi = 500;
@@ -356,32 +460,86 @@ var Cell = /*#__PURE__*/function () {
         document.querySelector(".cells").textContent = cells.length;
       }
     }
-  }, {
-    key: "jump",
-    value: function jump() {
-      var jumpY = Math.random();
-      var jumpX = Math.random();
-
-      if (jumpX > 0.6666) {
-        if (this.x < 702 - this.radius) this.x += this.jumpLength;
-      }
-
-      if (jumpX < 0.3334) {
-        if (this.x > 0 + this.radius) this.x -= this.jumpLength;
-      }
-
-      if (jumpY > 0.6666) {
-        if (this.y < 425 - this.radius) this.y += this.jumpLength;
-      }
-
-      if (jumpY < 0.3334) {
-        if (this.y > 0 + this.radius) this.y -= this.jumpLength;
-      }
-    }
   }]);
 
   return Cell;
 }();
+
+function _move2() {
+  if (this.x > 702 - this.radius) {
+    this.orientation += 0.5;
+  }
+
+  if (this.x < 0 + this.radius) {
+    this.orientation += 0.5;
+  }
+
+  if (this.y > 425 - this.radius) {
+    this.orientation += 0.5;
+  }
+
+  if (this.y < 0 + this.radius) {
+    this.orientation += 0.5;
+  }
+
+  if (this.controls.forward) {
+    this.speed += this.acceleration;
+  }
+
+  if (this.controls.reverse) {
+    this.speed -= this.acceleration;
+  }
+
+  if (this.speed > this.maxSpeed) {
+    this.speed = this.maxSpeed;
+  }
+
+  if (this.speed < -this.maxSpeed / 2) {
+    this.speed = -this.maxSpeed / 2;
+  } // if (this.speed > 0) {
+  //   this.speed -= this.friction;
+  // }
+  // if (this.speed < 0) {
+  //   this.speed += this.friction;
+  // }
+  // if (Math.abs(this.speed) < this.friction) {
+  //   this.speed = 0;
+  // }
+
+
+  if (this.controls.left) {
+    this.orientation += 0.03;
+  }
+
+  if (this.controls.right) {
+    this.orientation -= 0.03;
+  }
+
+  console.log(this.speed);
+  this.x -= Math.sin(this.orientation) * this.speed;
+  this.y -= Math.cos(this.orientation) * this.speed;
+}
+
+function _jump2() {
+  var jumpY = Math.random();
+  var jumpX = Math.random();
+
+  if (jumpX > 0.6666) {
+    if (this.x < 702 - this.radius) this.x += this.jumpLength;
+  }
+
+  if (jumpX < 0.3334) {
+    if (this.x > 0 + this.radius) this.x -= this.jumpLength;
+  }
+
+  if (jumpY > 0.6666) {
+    if (this.y < 425 - this.radius) this.y += this.jumpLength;
+  }
+
+  if (jumpY < 0.3334) {
+    if (this.y > 0 + this.radius) this.y -= this.jumpLength;
+  }
+}
 
 var Food = /*#__PURE__*/function () {
   function Food(x, y, radius, color) {
@@ -406,7 +564,7 @@ var Food = /*#__PURE__*/function () {
   return Food;
 }();
 
-var cell = new Cell([1], 0, 400, 200, 10, 125, 125, 125, 0.5, 500, 0, 1, 1, 1);
+var cell = new Cell([1], 0, 400, 200, 1, 0.49, 0.1, 0, 10, 125, 125, 125, 0.5, 500, 0, 1, 1, 1);
 var cells = [cell];
 var deadCells = [];
 var foods = [];
@@ -428,6 +586,13 @@ function animate() {
   foods.forEach(function (food) {
     return food.draw();
   });
+  foods.forEach(function (food) {
+    if (food.radius < 1) food.radius += 0.0003;
+    if (food.radius < 3) food.radius += 0.00003;
+    if (food.radius < 5) food.radius += 0.0000008;
+    if (food.radius < 7) food.radius += 0.000000008;
+    food.radius += 0.0000000008;
+  });
   var popRadius = 0;
   var popJump = 0;
   var popEnergiEff = 0;
@@ -435,7 +600,7 @@ function animate() {
   var statparagraph = "";
 
   for (Cell in cells) {
-    statparagraph += "Radius: ".concat(cells[Cell].radius.toFixed(2), " Movement: ").concat(cells[Cell].jumpLength.toFixed(2), "\n    Energy-efficiency: ").concat(cells[Cell].energiUpptagning.toFixed(2), "\n    Breeding-efficiancy: ").concat(cells[Cell].delningsEffektivitet.toFixed(2), "   ");
+    statparagraph += "Radius: ".concat(cells[Cell].radius.toFixed(2), " Wiggle: ").concat(cells[Cell].jumpLength.toFixed(2), "\n    Energy-efficiency: ").concat(cells[Cell].energiUpptagning.toFixed(2), "\n    Breeding-efficiancy: ").concat(cells[Cell].delningsEffektivitet.toFixed(2), " Speed: ").concat(cells[Cell].speed.toFixed(2), "   ");
     popRadius += cells[Cell].radius / cells.length;
     popJump += cells[Cell].jumpLength / cells.length;
     popEnergiEff += cells[Cell].energiUpptagning / cells.length;
@@ -460,7 +625,7 @@ function animate() {
   var deadStats = "Dead: Size: ".concat(deadPopRadius.toFixed(2), " -- Movement: ").concat(deadPopJump.toFixed(2), " -- Energy efficiency: ").concat(deadPopEnergiEff.toFixed(2), " -- Breeding efficiency: ").concat(deadPopCelldelningsEff.toFixed(2));
   document.querySelector(".dead-stats").textContent = deadStats;
 
-  if (cells.length > 99 || cells.length === 0) {
+  if (cells.length > 49 || cells.length === 0) {
     c.clearRect(0, 0, 702, 425); //Start of test
 
     var allCells = cells.concat(deadCells);
@@ -519,7 +684,7 @@ animate(); //                             1
 //1. se till att alla rader är centrerade horrisontelt genom att sätta x till mitten och subtrahera med bredden på halva nästa rad när det är generationsbyte - KLAR
 //2. Se till att syskon hamnar närmare varandra än kusiner
 //3. Se till att barnen hamnar under sina föräldrar
-},{"../scss/main.scss":"scss/main.scss","./object-creators/food-creator":"js/object-creators/food-creator.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"../scss/main.scss":"scss/main.scss","./object-creators/food-creator":"js/object-creators/food-creator.js","./controls":"js/controls.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;

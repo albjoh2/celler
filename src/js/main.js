@@ -1,5 +1,6 @@
 import "../scss/main.scss";
 import { genereraMat } from "./object-creators/food-creator";
+import Controls from "./controls";
 
 const canvas = document.querySelector(".plan");
 
@@ -18,6 +19,10 @@ class Cell {
     children,
     x,
     y,
+    maxSpeed,
+    speed,
+    acceleration,
+    orientation,
     radius,
     r,
     g,
@@ -33,6 +38,9 @@ class Cell {
     this.children = children;
     this.x = x;
     this.y = y;
+    this.maxSpeed = maxSpeed;
+    this.acceleration = acceleration;
+    this.orientation = orientation;
     this.radius = radius;
     this.r = r;
     this.g = g;
@@ -44,12 +52,20 @@ class Cell {
     this.jumpLength = jumpLength;
     this.energiUpptagning = energiUpptagning;
     this.delningsEffektivitet = delningsEffektivitet;
+
+    // this.speed = 0;
+    this.speed = speed;
+
     this.dead = false;
+    this.controls = new Controls();
   }
 
   draw() {
+    c.save();
+    c.translate(this.x, this.y);
+    c.rotate(-this.orientation);
     c.beginPath();
-    c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+    c.arc(0, 0, this.radius, 0, Math.PI * 2, false);
 
     if (!this.dead) {
       if (this.children > 0) {
@@ -68,23 +84,25 @@ class Cell {
     c.beginPath();
     c.fillStyle = "#3df322";
     c.fillRect(
-      this.x - this.radius,
-      this.y + this.radius * 1.5,
+      -this.radius,
+      +this.radius * 1.5,
       ((this.radius * 2) / 1000) * this.celldelningsProgress,
       3
     );
 
     c.fillStyle = "#aaf322";
     c.fillRect(
-      this.x - this.radius,
-      this.y + this.radius * 1.1,
+      -this.radius,
+      +this.radius * 1.1,
       ((this.radius * 2) / 1000) * this.energi,
       3
     );
+    c.restore();
   }
 
   update() {
-    this.jump();
+    this.#move();
+    this.#jump();
     this.draw();
 
     if (this.energi >= 0) {
@@ -95,14 +113,6 @@ class Cell {
     }
     for (let food in foods) {
       const { x, y, radius } = foods[food];
-      //TODO Gör maten mindre när man äter av den.
-      foods.forEach((food) => {
-        if (food.radius < 1) food.radius += 0.0000005;
-        if (food.radius < 3) food.radius += 0.00000005;
-        if (food.radius < 5) food.radius += 0.000000005;
-        if (food.radius < 7) food.radius += 0.0000000005;
-        if (food.radius < 10) food.radius += 0.00000000005;
-      });
 
       if (this.x < x + this.radius && x - this.radius < this.x) {
         if (this.y < y + this.radius && y - this.radius < this.y) {
@@ -127,6 +137,10 @@ class Cell {
           0,
           this.x,
           this.y,
+          this.maxSpeed * (Math.random() * (1.1 - 0.9) + 0.9),
+          this.speed * (Math.random() * (1.1 - 0.9) + 0.9),
+          this.acceleration * (Math.random() * (1.1 - 0.9) + 0.9),
+          Math.random() * (10 - 0) + 0,
           this.radius * (Math.random() * (1.1 - 0.9) + 0.9),
           this.r * (Math.random() * (1.1 - 0.9) + 0.9),
           this.g * (Math.random() * (1.1 - 0.9) + 0.9),
@@ -154,7 +168,60 @@ class Cell {
     }
   }
 
-  jump() {
+  #move() {
+    if (this.x > 702 - this.radius) {
+      this.orientation += 0.5;
+    }
+
+    if (this.x < 0 + this.radius) {
+      this.orientation += 0.5;
+    }
+
+    if (this.y > 425 - this.radius) {
+      this.orientation += 0.5;
+    }
+
+    if (this.y < 0 + this.radius) {
+      this.orientation += 0.5;
+    }
+
+    if (this.controls.forward) {
+      this.speed += this.acceleration;
+    }
+    if (this.controls.reverse) {
+      this.speed -= this.acceleration;
+    }
+
+    if (this.speed > this.maxSpeed) {
+      this.speed = this.maxSpeed;
+    }
+    if (this.speed < -this.maxSpeed / 2) {
+      this.speed = -this.maxSpeed / 2;
+    }
+
+    // if (this.speed > 0) {
+    //   this.speed -= this.friction;
+    // }
+    // if (this.speed < 0) {
+    //   this.speed += this.friction;
+    // }
+    // if (Math.abs(this.speed) < this.friction) {
+    //   this.speed = 0;
+    // }
+
+    if (this.controls.left) {
+      this.orientation += 0.03;
+    }
+    if (this.controls.right) {
+      this.orientation -= 0.03;
+    }
+
+    console.log(this.speed);
+    this.x -= Math.sin(this.orientation) * this.speed;
+    this.y -= Math.cos(this.orientation) * this.speed;
+  }
+
+  #jump() {
     const jumpY = Math.random();
     const jumpX = Math.random();
     if (jumpX > 0.6666) {
@@ -193,6 +260,10 @@ const cell = new Cell(
   0,
   400,
   200,
+  1,
+  0.49,
+  0.1,
+  0,
   10,
   125,
   125,
@@ -219,17 +290,26 @@ function animate() {
   const animationID = requestAnimationFrame(animate);
   cells.forEach((cell) => cell.update());
   foods.forEach((food) => food.draw());
+  foods.forEach((food) => {
+    if (food.radius < 1) food.radius += 0.0003;
+    if (food.radius < 3) food.radius += 0.00003;
+    if (food.radius < 5) food.radius += 0.0000008;
+    if (food.radius < 7) food.radius += 0.000000008;
+    food.radius += 0.0000000008;
+  });
   let popRadius = 0;
   let popJump = 0;
   let popEnergiEff = 0;
   let popCelldelningsEff = 0;
   let statparagraph = "";
   for (Cell in cells) {
-    statparagraph += `Radius: ${cells[Cell].radius.toFixed(
-      2
-    )} Movement: ${cells[Cell].jumpLength.toFixed(2)}
+    statparagraph += `Radius: ${cells[Cell].radius.toFixed(2)} Wiggle: ${cells[
+      Cell
+    ].jumpLength.toFixed(2)}
     Energy-efficiency: ${cells[Cell].energiUpptagning.toFixed(2)}
-    Breeding-efficiancy: ${cells[Cell].delningsEffektivitet.toFixed(2)}   `;
+    Breeding-efficiancy: ${cells[Cell].delningsEffektivitet.toFixed(
+      2
+    )} Speed: ${cells[Cell].speed.toFixed(2)}   `;
 
     popRadius += cells[Cell].radius / cells.length;
     popJump += cells[Cell].jumpLength / cells.length;
@@ -266,7 +346,7 @@ function animate() {
   )} -- Breeding efficiency: ${deadPopCelldelningsEff.toFixed(2)}`;
   document.querySelector(".dead-stats").textContent = deadStats;
 
-  if (cells.length > 99 || cells.length === 0) {
+  if (cells.length > 49 || cells.length === 0) {
     c.clearRect(0, 0, 702, 425);
 
     //Start of test
