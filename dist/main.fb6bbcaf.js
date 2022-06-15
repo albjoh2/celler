@@ -200,10 +200,10 @@ exports.genereraMat = void 0;
 var genereraMat = function genereraMat(c) {
   var foodlist = [];
 
-  for (var i = 0; i < 500; i++) {
-    var radius = Math.random() * (3 - 0) + 0;
+  for (var i = 0; i < 580; i++) {
+    var radius = Math.random() * (5 - 0) + 0;
     var x = Math.random() * (702 - radius) + radius;
-    var y = Math.random() * (425 - radius) + radius;
+    var y = Math.random() * (580 - radius) + radius;
     foodlist.push({
       x: x,
       y: y,
@@ -333,7 +333,7 @@ function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(
 
 var canvas = document.querySelector(".plan");
 canvas.width = 702;
-canvas.height = 425;
+canvas.height = 580;
 var c = canvas.getContext("2d");
 document.querySelector(".cells").textContent = 1;
 var foodlist = (0, _foodCreator.genereraMat)(c);
@@ -415,7 +415,7 @@ var Cell = /*#__PURE__*/function () {
       this.draw();
 
       if (this.energi >= 0) {
-        this.energi -= 0.6;
+        this.energi -= 0.5;
       }
 
       if (this.celldelningsProgress >= 0) {
@@ -444,7 +444,7 @@ var Cell = /*#__PURE__*/function () {
       if (this.celldelningsProgress > 1000) {
         this.children++;
         var newID = [].concat(_toConsumableArray(this.id), [this.children]);
-        cells.push(new Cell(newID, 0, this.x, this.y, this.maxSpeed * (Math.random() * (1.1 - 0.9) + 0.9), this.speed * (Math.random() * (1.1 - 0.9) + 0.9), this.acceleration * (Math.random() * (1.1 - 0.9) + 0.9), Math.random() * (10 - 0) + 0, this.radius * (Math.random() * (1.1 - 0.9) + 0.9), this.r * (Math.random() * (1.1 - 0.9) + 0.9), this.g * (Math.random() * (1.1 - 0.9) + 0.9), this.b * (Math.random() * (1.1 - 0.9) + 0.9), this.o * (Math.random() * (1.1 - 0.9) + 0.9), 500, 0, this.jumpLength * (Math.random() * (0.95 - 1.05) + 1.05), this.energiUpptagning * (Math.random() * (0.95 - 1.05) + 1.05), this.delningsEffektivitet * (Math.random() * (0.95 - 1.05) + 1.05)));
+        cells.push(new Cell(newID, 0, this.x, this.y, this.maxSpeed * (Math.random() * (1.1 - 0.9) + 0.9), this.speed * (Math.random() * (1.5 - 0.5) + 0.5), this.acceleration * (Math.random() * (1.1 - 0.9) + 0.9), Math.random() * 10 - 0, this.radius * (Math.random() * (1.1 - 0.9) + 0.9), this.r * (Math.random() * (1.1 - 0.9) + 0.9), this.g * (Math.random() * (1.1 - 0.9) + 0.9), this.b * (Math.random() * (1.1 - 0.9) + 0.9), this.o * (Math.random() * (1.1 - 0.9) + 0.9), 500, 0, this.jumpLength * (Math.random() * (0.95 - 1.05) + 1.05), this.energiUpptagning * (Math.random() * (0.95 - 1.05) + 1.05), this.delningsEffektivitet * (Math.random() * (0.95 - 1.05) + 1.05)));
         document.querySelector(".cells").textContent = cells.length;
         this.celldelningsProgress = 0;
         this.energi = 500;
@@ -467,19 +467,19 @@ var Cell = /*#__PURE__*/function () {
 
 function _move2() {
   if (this.x > 702 - this.radius) {
-    this.orientation += 0.5;
+    this.orientation += 0.1;
   }
 
   if (this.x < 0 + this.radius) {
-    this.orientation += 0.5;
+    this.orientation += 0.1;
   }
 
-  if (this.y > 425 - this.radius) {
-    this.orientation += 0.5;
+  if (this.y > 580 - this.radius) {
+    this.orientation += 0.1;
   }
 
   if (this.y < 0 + this.radius) {
-    this.orientation += 0.5;
+    this.orientation += 0.1;
   }
 
   if (this.controls.forward) {
@@ -515,7 +515,6 @@ function _move2() {
     this.orientation -= 0.03;
   }
 
-  console.log(this.speed);
   this.x -= Math.sin(this.orientation) * this.speed;
   this.y -= Math.cos(this.orientation) * this.speed;
 }
@@ -533,7 +532,7 @@ function _jump2() {
   }
 
   if (jumpY > 0.6666) {
-    if (this.y < 425 - this.radius) this.y += this.jumpLength;
+    if (this.y < 580 - this.radius) this.y += this.jumpLength;
   }
 
   if (jumpY < 0.3334) {
@@ -564,7 +563,7 @@ var Food = /*#__PURE__*/function () {
   return Food;
 }();
 
-var cell = new Cell([1], 0, 400, 200, 1, 0.49, 0.1, 0, 10, 125, 125, 125, 0.5, 500, 0, 1, 1, 1);
+var cell = new Cell([1], 0, 400, 200, 1, 0.0049, 0.1, 0, 10, 125, 125, 125, 0.5, 500, 0, 1, 1, 1);
 var cells = [cell];
 var deadCells = [];
 var foods = [];
@@ -578,7 +577,7 @@ for (var food in foodlist) {
 }
 
 function animate() {
-  c.clearRect(0, 0, 702, 425);
+  c.clearRect(0, 0, 702, 580);
   var animationID = requestAnimationFrame(animate);
   cells.forEach(function (cell) {
     return cell.update();
@@ -600,7 +599,7 @@ function animate() {
   var statparagraph = "";
 
   for (Cell in cells) {
-    statparagraph += "Radius: ".concat(cells[Cell].radius.toFixed(2), " Wiggle: ").concat(cells[Cell].jumpLength.toFixed(2), "\n    Energy-efficiency: ").concat(cells[Cell].energiUpptagning.toFixed(2), "\n    Breeding-efficiancy: ").concat(cells[Cell].delningsEffektivitet.toFixed(2), " Speed: ").concat(cells[Cell].speed.toFixed(2), "   ");
+    statparagraph += "Radius: ".concat(cells[Cell].radius.toFixed(2), " Wiggle: ").concat(cells[Cell].jumpLength.toFixed(2), "\n    Energy-efficiency: ").concat(cells[Cell].energiUpptagning.toFixed(2), "\n    Breeding-efficiancy: ").concat(cells[Cell].delningsEffektivitet.toFixed(2), " Speed: ").concat(cells[Cell].speed.toFixed(5), "   ");
     popRadius += cells[Cell].radius / cells.length;
     popJump += cells[Cell].jumpLength / cells.length;
     popEnergiEff += cells[Cell].energiUpptagning / cells.length;
@@ -626,7 +625,7 @@ function animate() {
   document.querySelector(".dead-stats").textContent = deadStats;
 
   if (cells.length > 49 || cells.length === 0) {
-    c.clearRect(0, 0, 702, 425); //Start of test
+    c.clearRect(0, 0, 702, 580); //Start of test
 
     var allCells = cells.concat(deadCells);
     allCells.sort(function (a, b) {

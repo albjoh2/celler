@@ -5,7 +5,7 @@ import Controls from "./controls";
 const canvas = document.querySelector(".plan");
 
 canvas.width = 702;
-canvas.height = 425;
+canvas.height = 580;
 
 const c = canvas.getContext("2d");
 
@@ -106,7 +106,7 @@ class Cell {
     this.draw();
 
     if (this.energi >= 0) {
-      this.energi -= 0.6;
+      this.energi -= 0.5;
     }
     if (this.celldelningsProgress >= 0) {
       this.celldelningsProgress -= 0.3;
@@ -138,9 +138,9 @@ class Cell {
           this.x,
           this.y,
           this.maxSpeed * (Math.random() * (1.1 - 0.9) + 0.9),
-          this.speed * (Math.random() * (1.1 - 0.9) + 0.9),
+          this.speed * (Math.random() * (1.5 - 0.5) + 0.5),
           this.acceleration * (Math.random() * (1.1 - 0.9) + 0.9),
-          Math.random() * (10 - 0) + 0,
+          Math.random() * 10 - 0,
           this.radius * (Math.random() * (1.1 - 0.9) + 0.9),
           this.r * (Math.random() * (1.1 - 0.9) + 0.9),
           this.g * (Math.random() * (1.1 - 0.9) + 0.9),
@@ -170,19 +170,19 @@ class Cell {
 
   #move() {
     if (this.x > 702 - this.radius) {
-      this.orientation += 0.5;
+      this.orientation += 0.1;
     }
 
     if (this.x < 0 + this.radius) {
-      this.orientation += 0.5;
+      this.orientation += 0.1;
     }
 
-    if (this.y > 425 - this.radius) {
-      this.orientation += 0.5;
+    if (this.y > 580 - this.radius) {
+      this.orientation += 0.1;
     }
 
     if (this.y < 0 + this.radius) {
-      this.orientation += 0.5;
+      this.orientation += 0.1;
     }
 
     if (this.controls.forward) {
@@ -216,7 +216,6 @@ class Cell {
       this.orientation -= 0.03;
     }
 
-    console.log(this.speed);
     this.x -= Math.sin(this.orientation) * this.speed;
     this.y -= Math.cos(this.orientation) * this.speed;
   }
@@ -231,7 +230,7 @@ class Cell {
       if (this.x > 0 + this.radius) this.x -= this.jumpLength;
     }
     if (jumpY > 0.6666) {
-      if (this.y < 425 - this.radius) this.y += this.jumpLength;
+      if (this.y < 580 - this.radius) this.y += this.jumpLength;
     }
     if (jumpY < 0.3334) {
       if (this.y > 0 + this.radius) this.y -= this.jumpLength;
@@ -261,7 +260,7 @@ const cell = new Cell(
   400,
   200,
   1,
-  0.49,
+  0.0049,
   0.1,
   0,
   10,
@@ -286,7 +285,7 @@ for (let food in foodlist) {
 }
 
 function animate() {
-  c.clearRect(0, 0, 702, 425);
+  c.clearRect(0, 0, 702, 580);
   const animationID = requestAnimationFrame(animate);
   cells.forEach((cell) => cell.update());
   foods.forEach((food) => food.draw());
@@ -309,7 +308,7 @@ function animate() {
     Energy-efficiency: ${cells[Cell].energiUpptagning.toFixed(2)}
     Breeding-efficiancy: ${cells[Cell].delningsEffektivitet.toFixed(
       2
-    )} Speed: ${cells[Cell].speed.toFixed(2)}   `;
+    )} Speed: ${cells[Cell].speed.toFixed(5)}   `;
 
     popRadius += cells[Cell].radius / cells.length;
     popJump += cells[Cell].jumpLength / cells.length;
@@ -347,7 +346,7 @@ function animate() {
   document.querySelector(".dead-stats").textContent = deadStats;
 
   if (cells.length > 49 || cells.length === 0) {
-    c.clearRect(0, 0, 702, 425);
+    c.clearRect(0, 0, 702, 580);
 
     //Start of test
     let allCells = cells.concat(deadCells);
