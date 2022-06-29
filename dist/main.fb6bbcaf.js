@@ -200,8 +200,8 @@ exports.genereraMat = void 0;
 var genereraMat = function genereraMat(c) {
   var foodlist = [];
 
-  for (var i = 0; i < 580; i++) {
-    var radius = Math.random() * (5 - 0) + 0;
+  for (var i = 0; i < 900; i++) {
+    var radius = Math.random() * (2 - 0) + 0;
     var x = Math.random() * (702 - radius) + radius;
     var y = Math.random() * (580 - radius) + radius;
     foodlist.push({
@@ -215,97 +215,12 @@ var genereraMat = function genereraMat(c) {
 };
 
 exports.genereraMat = genereraMat;
-},{}],"js/controls.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _classPrivateMethodInitSpec(obj, privateSet) { _checkPrivateRedeclaration(obj, privateSet); privateSet.add(obj); }
-
-function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
-
-function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
-
-var _addKeyboardListeners = /*#__PURE__*/new WeakSet();
-
-var Controls = /*#__PURE__*/_createClass(function Controls() {
-  _classCallCheck(this, Controls);
-
-  _classPrivateMethodInitSpec(this, _addKeyboardListeners);
-
-  this.forward = false;
-  this.reverse = false;
-  this.left = false;
-  this.right = false;
-
-  _classPrivateMethodGet(this, _addKeyboardListeners, _addKeyboardListeners2).call(this);
-});
-
-function _addKeyboardListeners2() {
-  var _this = this;
-
-  document.onkeydown = function (event) {
-    switch (event.key) {
-      case "ArrowLeft":
-        _this.left = true;
-        break;
-
-      case "ArrowRight":
-        _this.right = true;
-        break;
-
-      case "ArrowUp":
-        _this.forward = true;
-        break;
-
-      case "ArrowDown":
-        _this.reverse = true;
-        break;
-    }
-  };
-
-  document.onkeyup = function (event) {
-    switch (event.key) {
-      case "ArrowLeft":
-        _this.left = false;
-        break;
-
-      case "ArrowRight":
-        _this.right = false;
-        break;
-
-      case "ArrowUp":
-        _this.forward = false;
-        break;
-
-      case "ArrowDown":
-        _this.reverse = false;
-        break;
-    }
-  };
-}
-
-var _default = Controls;
-exports.default = _default;
 },{}],"js/main.js":[function(require,module,exports) {
 "use strict";
 
 require("../scss/main.scss");
 
 var _foodCreator = require("./object-creators/food-creator");
-
-var _controls = _interopRequireDefault(require("./controls"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
@@ -331,10 +246,16 @@ function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollect
 
 function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
 
+// import Controls from "./controls";
+// import Sensor from "./sensor";
 var canvas = document.querySelector(".plan");
+var diagramCanvas = document.querySelector(".diagram");
+diagramCanvas.width = 580;
+diagramCanvas.height = 200;
 canvas.width = 702;
 canvas.height = 580;
 var c = canvas.getContext("2d");
+var dc = diagramCanvas.getContext("2d");
 document.querySelector(".cells").textContent = 1;
 var foodlist = (0, _foodCreator.genereraMat)(c);
 
@@ -343,7 +264,7 @@ var _move = /*#__PURE__*/new WeakSet();
 var _jump = /*#__PURE__*/new WeakSet();
 
 var Cell = /*#__PURE__*/function () {
-  function Cell(id, children, x, y, maxSpeed, speed, acceleration, orientation, radius, r, g, b, o, energi, celldelningsProgress, jumpLength, energiUpptagning, delningsEffektivitet) {
+  function Cell(id, children, x, y, maxSpeed, speed, acceleration, orientation, radius, r, g, b, o, r2, g2, b2, o2, energi, celldelningsProgress, jumpLength, energiUpptagning, delningsEffektivitet) {
     _classCallCheck(this, Cell);
 
     _classPrivateMethodInitSpec(this, _jump);
@@ -362,6 +283,10 @@ var Cell = /*#__PURE__*/function () {
     this.g = g;
     this.b = b;
     this.o = o;
+    this.r2 = r2;
+    this.g2 = g2;
+    this.b2 = b2;
+    this.o2 = o2;
     this.color = "rgba(".concat(r, ",").concat(g, ",").concat(b, ",").concat(o, ")");
     this.energi = energi;
     this.celldelningsProgress = celldelningsProgress;
@@ -370,56 +295,73 @@ var Cell = /*#__PURE__*/function () {
     this.delningsEffektivitet = delningsEffektivitet; // this.speed = 0;
 
     this.speed = speed;
-    this.dead = false;
-    this.controls = new _controls.default();
+    this.dead = false; // this.sensor = new Sensor(this);
+    // this.controls = new Controls();
   }
 
   _createClass(Cell, [{
     key: "draw",
     value: function draw() {
-      c.save();
-      c.translate(this.x, this.y);
-      c.rotate(-this.orientation);
-      c.beginPath();
-      c.arc(0, 0, this.radius, 0, Math.PI * 2, false);
+      if (cells.length < 100 && cells.length > 0) {
+        c.save();
+        c.translate(this.x, this.y);
+        c.rotate(-this.orientation);
+        c.beginPath();
+        c.arc(0, 0, this.radius, 0, Math.PI * 2, false);
+        var grd = c.createRadialGradient(0, 0, 0, 0, 0, this.radius);
+        grd.addColorStop(0, "rgba(".concat(this.r, ",").concat(this.g, ",").concat(this.b, ",").concat(this.o, ")"));
+        grd.addColorStop(1, "rgba(".concat(this.r2, ",").concat(this.g2, ",").concat(this.b2, ",").concat(this.o2, ")"));
 
-      if (!this.dead) {
-        if (this.children > 0) {
+        if (this.dead) {
           c.strokeStyle = "black";
-        } else c.strokeStyle = "green";
-      } else {
-        if (this.children === 0) {
-          c.strokeStyle = "red";
-        } else c.strokeStyle = "yellow";
-      }
+          c.stroke();
+        }
 
-      c.stroke();
-      c.fillStyle = this.color;
-      c.fill();
-      c.beginPath();
-      c.fillStyle = "#3df322";
-      c.fillRect(-this.radius, +this.radius * 1.5, this.radius * 2 / 1000 * this.celldelningsProgress, 3);
-      c.fillStyle = "#aaf322";
-      c.fillRect(-this.radius, +this.radius * 1.1, this.radius * 2 / 1000 * this.energi, 3);
-      c.restore();
+        c.fillStyle = grd;
+        c.fill();
+        c.beginPath();
+        c.fillStyle = "#3df322";
+        c.fillRect(-this.radius, +this.radius * 1.5, this.radius * 2 / 1000 * this.celldelningsProgress, 3);
+        c.fillStyle = "blue";
+        c.fillRect(-this.radius, +this.radius * 1.1, this.radius * 2 / 1000 * this.energi, 3);
+        c.restore(); // this.sensor.draw(c);
+      } else {
+        c.beginPath();
+        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+
+        var _grd = c.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
+
+        _grd.addColorStop(0, "rgba(".concat(this.r, ",").concat(this.g, ",").concat(this.b, ",").concat(this.o, ")"));
+
+        _grd.addColorStop(1, "rgba(".concat(this.r2, ",").concat(this.g2, ",").concat(this.b2, ",").concat(this.o2, ")"));
+
+        if (this.dead) {
+          c.strokeStyle = "black";
+          c.stroke();
+        }
+
+        c.fillStyle = _grd;
+        c.fill();
+      }
     }
   }, {
     key: "update",
     value: function update() {
       var _this = this;
 
-      _classPrivateMethodGet(this, _move, _move2).call(this);
+      _classPrivateMethodGet(this, _move, _move2).call(this); // this.sensor.update(foods);
+
 
       _classPrivateMethodGet(this, _jump, _jump2).call(this);
 
       this.draw();
 
       if (this.energi >= 0) {
-        this.energi -= 0.5;
+        this.energi -= this.speed / 4 + Math.pow(this.jumpLength, 3) / 3 + Math.pow(this.radius, 2) / 8000 + 0.5;
       }
 
       if (this.celldelningsProgress >= 0) {
-        this.celldelningsProgress -= 0.3;
+        this.celldelningsProgress -= this.speed / 4 + Math.pow(this.jumpLength, 3) / 3 + Math.pow(this.radius, 3) / 2500 + 0.5;
       }
 
       for (var food in foods) {
@@ -435,8 +377,8 @@ var Cell = /*#__PURE__*/function () {
             }
 
             if (this.energi >= 1000) {
-              this.celldelningsProgress += this.delningsEffektivitet * radius * 1.5;
-            } else if (foods[food].radius > 1.1) this.energi += this.energiUpptagning * radius * 2;
+              this.celldelningsProgress += this.delningsEffektivitet * radius * 2;
+            } else if (foods[food].radius > 1.1) this.energi += this.energiUpptagning * radius * 4;
           }
         }
       }
@@ -444,7 +386,7 @@ var Cell = /*#__PURE__*/function () {
       if (this.celldelningsProgress > 1000) {
         this.children++;
         var newID = [].concat(_toConsumableArray(this.id), [this.children]);
-        cells.push(new Cell(newID, 0, this.x, this.y, this.maxSpeed * (Math.random() * (1.1 - 0.9) + 0.9), this.speed * (Math.random() * (1.5 - 0.5) + 0.5), this.acceleration * (Math.random() * (1.1 - 0.9) + 0.9), Math.random() * 10 - 0, this.radius * (Math.random() * (1.1 - 0.9) + 0.9), this.r * (Math.random() * (1.1 - 0.9) + 0.9), this.g * (Math.random() * (1.1 - 0.9) + 0.9), this.b * (Math.random() * (1.1 - 0.9) + 0.9), this.o * (Math.random() * (1.1 - 0.9) + 0.9), 500, 0, this.jumpLength * (Math.random() * (0.95 - 1.05) + 1.05), this.energiUpptagning * (Math.random() * (0.95 - 1.05) + 1.05), this.delningsEffektivitet * (Math.random() * (0.95 - 1.05) + 1.05)));
+        cells.push(new Cell(newID, 0, this.x, this.y, this.maxSpeed * (Math.random() * (1.2 - 0.8) + 0.8), this.speed * (Math.random() * (1.2 - 0.8) + 0.8), this.acceleration * (Math.random() * (1.2 - 0.8) + 0.8), Math.random() * 10 - 0, this.radius * (Math.random() * (1.1 - 0.9) + 0.9), this.r * (Math.random() * (1.2 - 0.8) + 0.8), this.g * (Math.random() * (1.2 - 0.8) + 0.8), this.b * (Math.random() * (1.2 - 0.8) + 0.8), this.o * (Math.random() * (1.2 - 0.8) + 0.8), this.r2 * (Math.random() * (1.2 - 0.8) + 0.8), this.g2 * (Math.random() * (1.2 - 0.8) + 0.8), this.b2 * (Math.random() * (1.2 - 0.8) + 0.8), this.o2 * (Math.random() * (1.2 - 0.8) + 0.8), 500, 0, this.jumpLength * (Math.random() * (1.2 - 0.8) + 0.8), this.energiUpptagning * (Math.random() * (1.2 - 0.8) + 0.8), this.delningsEffektivitet * (Math.random() * (1.2 - 0.8) + 0.8)));
         document.querySelector(".cells").textContent = cells.length;
         this.celldelningsProgress = 0;
         this.energi = 500;
@@ -480,15 +422,13 @@ function _move2() {
 
   if (this.y < 0 + this.radius) {
     this.orientation += 0.1;
-  }
+  } // if (this.controls.forward) {
+  //   this.speed += this.acceleration;
+  // }
+  // if (this.controls.reverse) {
+  //   this.speed -= this.acceleration;
+  // }
 
-  if (this.controls.forward) {
-    this.speed += this.acceleration;
-  }
-
-  if (this.controls.reverse) {
-    this.speed -= this.acceleration;
-  }
 
   if (this.speed > this.maxSpeed) {
     this.speed = this.maxSpeed;
@@ -505,15 +445,13 @@ function _move2() {
   // if (Math.abs(this.speed) < this.friction) {
   //   this.speed = 0;
   // }
+  // if (this.controls.left) {
+  //   this.orientation += 0.03;
+  // }
+  // if (this.controls.right) {
+  //   this.orientation -= 0.03;
+  // }
 
-
-  if (this.controls.left) {
-    this.orientation += 0.03;
-  }
-
-  if (this.controls.right) {
-    this.orientation -= 0.03;
-  }
 
   this.x -= Math.sin(this.orientation) * this.speed;
   this.y -= Math.cos(this.orientation) * this.speed;
@@ -548,12 +486,40 @@ var Food = /*#__PURE__*/function () {
     this.y = y;
     this.radius = radius;
     this.color = color;
-  }
+  } // #createPolygon() {
+  //   const points = [];
+  //   const rad = Math.hypot(this.radius, this.radius);
+  //   const alpha = Math.atan2(this.radius, this.height);
+  //   points.push({
+  //     x: this.x - Math.sin(-alpha) * rad,
+  //     y: this.y - Math.cos(-alpha) * rad,
+  //   });
+  //   points.push({
+  //     x: this.x - Math.sin(alpha) * rad,
+  //     y: this.y - Math.cos(alpha) * rad,
+  //   });
+  //   points.push({
+  //     x: this.x - Math.sin(Math.PI - alpha) * rad,
+  //     y: this.y - Math.cos(Math.PI - alpha) * rad,
+  //   });
+  //   points.push({
+  //     x: this.x - Math.sin(Math.PI + alpha) * rad,
+  //     y: this.y - Math.cos(Math.PI + alpha) * rad,
+  //   });
+  //   return points;
+  // }
+
 
   _createClass(Food, [{
     key: "draw",
     value: function draw() {
-      c.beginPath();
+      // this.polygon = this.#createPolygon();
+      c.beginPath(); // c.moveTo(this.polygon[0].x, this.polygon[0].y);
+      // for (let i = 1; i < this.polygon.length; i++) {
+      //   c.lineTo(this.polygon[i].x, this.polygon[i].y);
+      // }
+      // c.fill();
+
       c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
       c.fillStyle = this.color;
       c.fill();
@@ -563,7 +529,7 @@ var Food = /*#__PURE__*/function () {
   return Food;
 }();
 
-var cell = new Cell([1], 0, 400, 200, 1, 0.0049, 0.1, 0, 10, 125, 125, 125, 0.5, 500, 0, 1, 1, 1);
+var cell = new Cell([1], 0, 400, 200, 1, 0.09, 0.1, 0, 10, 100, 100, 100, 0.5, 100, 100, 100, 0.5, 500, 0, 1, 1, 1);
 var cells = [cell];
 var deadCells = [];
 var foods = [];
@@ -576,114 +542,356 @@ for (var food in foodlist) {
   foods[food] = new Food(x, y, radius, "darkgreen");
 }
 
+var cellLength = 1;
+var diagramX = 0;
+var prevYSize = diagramCanvas.height / 2 + 100 - Math.pow(10, 2);
+var prevYFoodRadius = diagramCanvas.height / 2 + 128 - Math.pow(2, 6);
+var prevYPopJump = diagramCanvas.height / 2 + 1 - Math.pow(1, 6);
+var prevYPopEnergyEff = diagramCanvas.height / 2 + 1 - Math.pow(1, 6);
+var prevYBreedingEff = diagramCanvas.height / 2 + 1 - Math.pow(1, 6);
+var prevYSpeed = diagramCanvas.height / 2 - Math.pow(0.09, 6);
+
 function animate() {
   c.clearRect(0, 0, 702, 580);
   var animationID = requestAnimationFrame(animate);
+  foods.forEach(function (food) {
+    return food.draw();
+  });
   cells.forEach(function (cell) {
     return cell.update();
   });
   foods.forEach(function (food) {
-    return food.draw();
-  });
-  foods.forEach(function (food) {
     if (food.radius < 1) food.radius += 0.0003;
-    if (food.radius < 3) food.radius += 0.00003;
-    if (food.radius < 5) food.radius += 0.0000008;
-    if (food.radius < 7) food.radius += 0.000000008;
-    food.radius += 0.0000000008;
+    if (food.radius < 3) food.radius += 0.00001;
+    if (food.radius < 5) food.radius += 0.000001;
+    if (food.radius < 7) food.radius += 0.0000001;
+    food.radius += 0.00000001;
   });
-  var popRadius = 0;
-  var popJump = 0;
-  var popEnergiEff = 0;
-  var popCelldelningsEff = 0;
-  var statparagraph = "";
 
-  for (Cell in cells) {
-    statparagraph += "Radius: ".concat(cells[Cell].radius.toFixed(2), " Wiggle: ").concat(cells[Cell].jumpLength.toFixed(2), "\n    Energy-efficiency: ").concat(cells[Cell].energiUpptagning.toFixed(2), "\n    Breeding-efficiancy: ").concat(cells[Cell].delningsEffektivitet.toFixed(2), " Speed: ").concat(cells[Cell].speed.toFixed(5), "   ");
-    popRadius += cells[Cell].radius / cells.length;
-    popJump += cells[Cell].jumpLength / cells.length;
-    popEnergiEff += cells[Cell].energiUpptagning / cells.length;
-    popCelldelningsEff += cells[Cell].delningsEffektivitet / cells.length;
-  }
+  if (cellLength !== cells.length) {
+    cellLength = cells.length;
+    var popRadius = 0;
+    var popJump = 0;
+    var popEnergiEff = 0;
+    var popCelldelningsEff = 0;
+    var popSpeed = 0;
+    var statsParagraph = "";
+    var statsRubriker = "Radius: \xA0Wiggle: \xA0Energy effectivity: \xA0Breeding effectivity: \xA0Speed: \xA0Generation: ";
+    achivementsToPrint = "";
 
-  document.querySelector(".cell-statistik").textContent = statparagraph;
-  var stats = "Alive: Size: ".concat(popRadius.toFixed(2), " -- Movement: ").concat(popJump.toFixed(2), " -- Energy efficiency: ").concat(popEnergiEff.toFixed(2), " -- Breeding efficiency: ").concat(popCelldelningsEff.toFixed(2));
-  document.querySelector(".stats").textContent = stats;
-  var deadPopRadius = 0;
-  var deadPopJump = 0;
-  var deadPopEnergiEff = 0;
-  var deadPopCelldelningsEff = 0;
-
-  for (Cell in deadCells) {
-    deadPopRadius += deadCells[Cell].radius / deadCells.length;
-    deadPopJump += deadCells[Cell].jumpLength / deadCells.length;
-    deadPopEnergiEff += deadCells[Cell].energiUpptagning / deadCells.length;
-    deadPopCelldelningsEff += deadCells[Cell].delningsEffektivitet / deadCells.length;
-  }
-
-  var deadStats = "Dead: Size: ".concat(deadPopRadius.toFixed(2), " -- Movement: ").concat(deadPopJump.toFixed(2), " -- Energy efficiency: ").concat(deadPopEnergiEff.toFixed(2), " -- Breeding efficiency: ").concat(deadPopCelldelningsEff.toFixed(2));
-  document.querySelector(".dead-stats").textContent = deadStats;
-
-  if (cells.length > 49 || cells.length === 0) {
-    c.clearRect(0, 0, 702, 580); //Start of test
-
-    var allCells = cells.concat(deadCells);
-    allCells.sort(function (a, b) {
-      if (a.id < b.id) return -1;
-      if (a.id > b.id) return 1;
-    });
-    allCells.sort(function (a, b) {
-      if (a.id.length < b.id.length) {
-        return -1;
+    for (Cell in cells) {
+      if (cells[Cell].id.length > 9) {
+        Achivements.tenGenerations = true;
       }
 
-      if (a.id.length > b.id.length) {
-        return +1;
-      }
-    });
-    var _y = 30;
-    var _x = 0;
-    var lastCellsGeneration = 0;
-    var pappasGenerationsBarn = 1;
-    var lastCellsPapi = 1;
-    console.log(allCells);
-
-    for (Cell in allCells) {
-      var generation = allCells[Cell].id.length;
-      allCells[Cell].radius *= 0.5;
-      _y = 15 * generation;
-      _x += 15;
-
-      if (JSON.stringify(allCells[Cell].id.slice(0, -1)) !== JSON.stringify(lastCellsPapi)) {
-        _x += 10;
+      if (cells[Cell].id.length > 19) {
+        Achivements.twentyGenerations = true;
       }
 
-      if (lastCellsGeneration !== generation) {
-        _x = 702 / 2 - 15 * (pappasGenerationsBarn / 2) + 12.5;
-        pappasGenerationsBarn = 0;
+      if (cells[Cell].id.length > 49) {
+        Achivements.fiftyGenerations = true;
       }
 
-      lastCellsPapi = allCells[Cell].id.slice(0, -1);
-      pappasGenerationsBarn += allCells[Cell].children;
-      lastCellsGeneration = generation;
-      allCells[Cell].x = _x;
-      allCells[Cell].y = _y;
-      allCells[Cell].energi = 0;
-      allCells[Cell].celldelningsProgress = 0;
-      allCells[Cell].draw();
+      if (cells[Cell].id.length > 79) {
+        Achivements.eightyGenerations = true;
+      }
+
+      if (cells[Cell].id.length > 99) {
+        Achivements.hundredGenerations = true;
+      }
+
+      if (cells[Cell].speed > 0.1) {
+        Achivements.firstCellWalking = true;
+      }
+
+      if (cells[Cell].speed > 0.5) {
+        Achivements.firstCellRunning = true;
+      }
+
+      if (cells[Cell].speed > 1) {
+        Achivements.usainBolt = true;
+      }
+
+      if (cells[Cell].radius > 12) {
+        Achivements.bigMamaIsHere = true;
+      }
+
+      if (cells[Cell].radius > 15) {
+        Achivements.hugeMamaIsHere = true;
+      }
+
+      if (cells[Cell].children > 4) {
+        Achivements.genghisKhan = true;
+      }
+
+      if (cells[Cell].jumpLength < 0.1) {
+        Achivements.adhdFinnalyCured = true;
+      }
+
+      statsParagraph += "\xA0".concat(cells[Cell].radius < 10 ? cells[Cell].radius.toFixed(3) : cells[Cell].radius.toFixed(2), "\xA0\xA0\xA0\xA0\xA0 ").concat(cells[Cell].jumpLength.toFixed(2), "\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0 ").concat(cells[Cell].energiUpptagning.toFixed(2), "\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0 ").concat(cells[Cell].delningsEffektivitet.toFixed(2), "\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0 ").concat(cells[Cell].speed.toFixed(3), "\n    \xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0").concat(cells[Cell].id.length, "\xA0\xA0\xA0\xA0\xA0 ");
+      popRadius += cells[Cell].radius / cells.length;
+      popJump += cells[Cell].jumpLength / cells.length;
+      popEnergiEff += cells[Cell].energiUpptagning / cells.length;
+      popCelldelningsEff += cells[Cell].delningsEffektivitet / cells.length;
+
+      if (cells[Cell].speed > 0.01) {
+        popSpeed += cells[Cell].speed / cells.length;
+      }
     }
 
-    cancelAnimationFrame(animationID);
-  }
-}
+    var foodRadiusSnitt = 0;
 
+    if (cells.length < 100) {
+      foods.forEach(function (food, i) {
+        foodRadiusSnitt += foods[i].radius;
+      });
+    }
+
+    foodRadiusSnitt /= 900;
+    dc.beginPath();
+    dc.moveTo(diagramX, prevYSize);
+    dc.lineTo(diagramX + 1, diagramCanvas.height / 2 + 100 - Math.pow(popRadius, 2));
+    dc.strokeStyle = "red";
+    dc.lineWidth = 1;
+    dc.stroke();
+    prevYSize = diagramCanvas.height / 2 + 100 - Math.pow(popRadius, 2);
+    dc.beginPath();
+    dc.moveTo(diagramX, prevYFoodRadius);
+    dc.lineTo(diagramX + 1, diagramCanvas.height / 2 + 64 - Math.pow(foodRadiusSnitt, 6));
+    dc.strokeStyle = "green";
+    dc.lineWidth = 1;
+    dc.stroke();
+    prevYFoodRadius = diagramCanvas.height / 2 + 64 - Math.pow(foodRadiusSnitt, 6);
+    dc.beginPath();
+    dc.moveTo(diagramX, prevYPopJump);
+    dc.lineTo(diagramX + 1, diagramCanvas.height / 2 + 1 - Math.pow(popJump, 8));
+    dc.strokeStyle = "yellow";
+    dc.lineWidth = 1;
+    dc.stroke();
+    prevYPopJump = diagramCanvas.height / 2 + 1 - Math.pow(popJump, 8);
+    dc.beginPath();
+    dc.moveTo(diagramX, prevYPopEnergyEff);
+    dc.lineTo(diagramX + 1, diagramCanvas.height / 2 + 1 - Math.pow(popEnergiEff, 8));
+    dc.strokeStyle = "blue";
+    dc.lineWidth = 1;
+    dc.stroke();
+    prevYPopEnergyEff = diagramCanvas.height / 2 + 1 - Math.pow(popEnergiEff, 8);
+    dc.beginPath();
+    dc.moveTo(diagramX, prevYBreedingEff);
+    dc.lineTo(diagramX + 1, diagramCanvas.height / 2 + 1 - Math.pow(popCelldelningsEff, 8));
+    dc.strokeStyle = "lightgreen";
+    dc.lineWidth = 1;
+    dc.stroke();
+    prevYBreedingEff = diagramCanvas.height / 2 + 1 - Math.pow(popCelldelningsEff, 8);
+    dc.beginPath();
+    dc.moveTo(diagramX, prevYSpeed);
+    dc.lineTo(diagramX + 1, diagramCanvas.height / 2 - Math.pow(popSpeed, 6));
+    dc.strokeStyle = "black";
+    dc.lineWidth = 1;
+    dc.stroke();
+    prevYSpeed = diagramCanvas.height / 2 - Math.pow(popSpeed, 12);
+    diagramX += 0.25;
+    document.querySelector(".cell-statistik").textContent = statsRubriker + statsParagraph;
+    var stats = "Alive: Size: ".concat(popRadius.toFixed(2), " -- Wiggle: ").concat(popJump.toFixed(2), " -- Energy efficiency: ").concat(popEnergiEff.toFixed(2), " -- Breeding efficiency: ").concat(popCelldelningsEff.toFixed(2), " -- Speed: ").concat(popSpeed.toFixed(2));
+    document.querySelector(".alive-stats").textContent = stats;
+    var deadPopRadius = 0;
+    var deadPopJump = 0;
+    var deadPopEnergiEff = 0;
+    var deadPopCelldelningsEff = 0;
+    var deadPopSpeed = 0.0;
+
+    for (Cell in deadCells) {
+      deadPopRadius += deadCells[Cell].radius / deadCells.length;
+      deadPopJump += deadCells[Cell].jumpLength / deadCells.length;
+      deadPopEnergiEff += deadCells[Cell].energiUpptagning / deadCells.length;
+      deadPopCelldelningsEff += deadCells[Cell].delningsEffektivitet / deadCells.length;
+
+      if (deadCells[Cell].speed > 0.01) {
+        deadPopSpeed += deadCells[Cell].speed / deadCells.length;
+      }
+    }
+
+    var deadStats = "Dead: Size: ".concat(deadPopRadius.toFixed(2), " -- Wiggle: ").concat(deadPopJump.toFixed(2), " -- Energy efficiency: ").concat(deadPopEnergiEff.toFixed(2), " -- Breeding efficiency: ").concat(deadPopCelldelningsEff.toFixed(2), " -- Speed: ").concat(deadPopSpeed.toFixed(2));
+    document.querySelector(".dead-stats").textContent = deadStats; //When fist child have been born
+
+    if (cells.length > 1) {
+      Achivements.firstChild = true;
+    }
+
+    if (cells.length > 9) {
+      Achivements.thisIsAGoodSim = true;
+    }
+
+    if (cells.length > 19) {
+      Achivements.thisIsAGreateSim = true;
+    }
+
+    if (cells.length > 39) {
+      Achivements.thisIsAFantasticSim = true;
+    }
+
+    if (cells.length > 59) {
+      Achivements.thisIsAnAmazingSim = true;
+    }
+
+    if (cells.length > 79) {
+      Achivements.thisIsAIncredibleSim = true;
+    }
+
+    if (cells.length > 99) {
+      Achivements.winningRound = true;
+    }
+
+    if (cells.length + deadCells.length > 100) {
+      Achivements.hundredCells = true;
+    }
+
+    if (cells.length + deadCells.length > 500) {
+      Achivements.fiveHundredCells = true;
+    }
+
+    Object.keys(Achivements).forEach(function (key) {
+      return achivementsToPrint += "".concat(key, " ").concat(Achivements[key], " ");
+    });
+    document.querySelector(".achivements").textContent = achivementsToPrint;
+
+    if (cells.length > 99 || cells.length === 0) {
+      canvas.height = 20000; //Start of test
+
+      var allCells = cells.concat(deadCells);
+      allCells.sort(function (a, b) {
+        if (a.id < b.id) return -1;
+        if (a.id > b.id) return 1;
+      });
+      allCells.sort(function (a, b) {
+        if (a.id.length < b.id.length) {
+          return -1;
+        }
+
+        if (a.id.length > b.id.length) {
+          return +1;
+        }
+      });
+      var _y = 30;
+      var _x = 0;
+      var lastCellsGeneration = 0;
+      var pappasGenerationsBarn = 1;
+      var lastCellsPapi = 1;
+      console.log(allCells);
+
+      for (Cell in allCells) {
+        var generation = allCells[Cell].id.length;
+        allCells[Cell].radius *= 0.5;
+        _y = 20 * generation;
+        _x += 15;
+
+        if (JSON.stringify(allCells[Cell].id.slice(0, -1)) !== JSON.stringify(lastCellsPapi)) {
+          _x += 10;
+        }
+
+        if (lastCellsGeneration !== generation) {
+          _x = 702 / 2 - 20 * (pappasGenerationsBarn / 2) + 12.5;
+          pappasGenerationsBarn = 0;
+        }
+
+        lastCellsPapi = allCells[Cell].id.slice(0, -1);
+        pappasGenerationsBarn += allCells[Cell].children;
+        lastCellsGeneration = generation;
+        allCells[Cell].x = _x;
+        allCells[Cell].y = _y;
+        allCells[Cell].energi = 0;
+        allCells[Cell].celldelningsProgress = 0;
+        allCells[Cell].draw();
+      }
+
+      for (var i = 0; i < allCells[allCells.length - 1].id.length + 1; i++) {
+        for (Cell in allCells) {
+          if (allCells[Cell].id.length === i) {
+            var cellToGetParent = Cell;
+            var parentCell = allCells[Cell].id.slice(0, -1);
+            console.log(parentCell);
+
+            for (Cell in allCells) {
+              if (JSON.stringify(allCells[Cell].id) === JSON.stringify(parentCell)) {
+                c.beginPath();
+                c.lineWidth = 0.5;
+                c.strokeStyle = "black";
+                c.moveTo(allCells[Cell].x, allCells[Cell].y + allCells[Cell].radius);
+                c.lineTo(allCells[cellToGetParent].x, allCells[cellToGetParent].y - allCells[cellToGetParent].radius);
+                c.stroke();
+              }
+            }
+          }
+        }
+      }
+
+      for (Cell in allCells) {
+        allCells[Cell].draw();
+      }
+
+      cancelAnimationFrame(animationID);
+    }
+  }
+} //List of achevements
+
+
+var Achivements = {
+  //When fist child have been born
+  firstChild: false,
+  //When 10 cells on the plane
+  thisIsAGoodSim: false,
+  //When 20 cells on the plane
+  thisIsAGreateSim: false,
+  //When 40 cells on the plane
+  thisIsAFantasticSim: false,
+  //When 60 cells on the plane
+  thisIsAnAmazingSim: false,
+  //When 80 cells on the plane
+  thisIsAIncredibleSim: false,
+  //When 100 cells on the plane
+  winningRound: false,
+  //When 10 generations have been born
+  tenGenerations: false,
+  //When 20 generations have been born
+  twentyGenerations: false,
+  //When 50 generations have been born
+  fiftyGenerations: false,
+  //When 80 generations have been born
+  eightyGenerations: false,
+  //When 100 generations have been born
+  hundredGenerations: false,
+  //When a cell is faster than 0.1 speed
+  firstCellWalking: false,
+  //When a cell is faster than 0.5 speed
+  firstCellRunning: false,
+  //When a cell is faster than 0.5 speed
+  usainBolt: false,
+  //When a cell has been born with size >= 12
+  bigMamaIsHere: false,
+  //When a cell has been born with size >= 15
+  hugeMamaIsHere: false,
+  //When a cell has had > 5 children
+  genghisKhan: false,
+  //When a cell wiggle < 0.1
+  adhdFinnalyCured: false,
+  //When total nr of cells been alive >= 100
+  hundredCells: false,
+  //When total nr of cells been alive >= 500
+  fiveHundredCells: false
+};
+var achivementsToPrint = "";
+Object.keys(Achivements).forEach(function (key) {
+  return achivementsToPrint += "".concat(key, " ").concat(Achivements[key], " ");
+});
+document.querySelector(".achivements").textContent = achivementsToPrint;
+document.querySelector(".cell-statistik").textContent = "Radius: \xA0Wiggle: \xA0Energy effectivity: \xA0Breeding effectivity: \xA0Speed: \xA0Generation: \xA010.00\xA0\xA0\xA0\xA0\xA0 1.00\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0 1.00\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0 1.00\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0 0.09\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA0\xA01\xA0\xA0\xA0\xA0\xA0";
 animate(); //                             1
 //   1,1         1,2          1,3        1,4           1,5
 //  1,1,1   1,2,1   1,2,2               1,4,1  1,5,1  1,5,2  1,5,3
 //1. se till att alla rader är centrerade horrisontelt genom att sätta x till mitten och subtrahera med bredden på halva nästa rad när det är generationsbyte - KLAR
 //2. Se till att syskon hamnar närmare varandra än kusiner
 //3. Se till att barnen hamnar under sina föräldrar
-},{"../scss/main.scss":"scss/main.scss","./object-creators/food-creator":"js/object-creators/food-creator.js","./controls":"js/controls.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"../scss/main.scss":"scss/main.scss","./object-creators/food-creator":"js/object-creators/food-creator.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -711,7 +919,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54976" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50282" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -8,12 +8,32 @@
     <script src="/main.fb6bbcaf.js" defer=""></script>
   <link rel="stylesheet" href="/main.fb6bbcaf.css"></head>
   <body>
-    <h1 class="cells"></h1>
-    <h2 class="stats"></h2>
-    <h2 class="dead-stats"></h2>
-    <canvas class="plan"></canvas>
-    <div class="celler-statistik">
-      <p class="cell-statistik"></p>
+    <div class="left-side">
+      <h1 class="cells"></h1>
+      <div class="stats">
+        <h2 class="dead-stats">
+          Dead: Size: 0.00 -- Wiggle: 0.00 -- Energy efficiency: 0.00 --
+          Breeding efficiency: 0.00 -- Speed: 0.00
+        </h2>
+        <h2 class="alive-stats">
+          Alive: Size: 10.00 -- Wiggle: 0.50 -- Energy efficiency: 1.00 --
+          Breeding efficiency: 1.00 -- Speed: 0.00
+        </h2>
+      </div>
+      <canvas class="plan"></canvas>
+    </div>
+    <div class="whole-right-side">
+      <div class="right-side">
+        <div class="celler-statistik">
+          <p class="cell-statistik"></p>
+        </div>
+        <div class="achivements-container">
+          <p class="achivements"></p>
+        </div>
+      </div>
+      <div>
+        <canvas class="diagram"></canvas>
+      </div>
     </div>
   </body>
 </html>

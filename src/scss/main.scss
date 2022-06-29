@@ -6,38 +6,70 @@
 
 body {
   background-color: rgb(230, 230, 230);
-  position: relative;
+  position: absolute;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
+  // align-items: center;
   justify-content: center;
   color: black;
+  width: 100%;
 }
 
-canvas {
+.left-side {
+  position: relative;
+  flex-direction: column;
+  width: 54%;
+}
+
+.right-side {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.diagram {
+  background-color: rgb(240, 240, 240);
+  margin-top: 50px;
+}
+
+.plan {
   border: 1px solid black;
   background-color: rgb(240, 240, 240);
   position: relative;
+  margin-left: 5px;
 }
 
 h1 {
-  position: absolute;
-  left: 10px;
-  top: 10px;
-  z-index: 1;
+  position: relative;
+  margin-left: 10px;
 }
 
-h2 {
-  margin-left: 8px;
-  bottom: -20px;
-  z-index: 1;
-  font-size: 16px;
+.stats {
+  margin-left: 30px;
+  position: relative;
+  width: 800px;
+  font-size: 10px;
+  margin-top: -35px;
 }
 
-div {
-  width: 620px;
+.celler-statistik {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 350px;
+  position: relative;
+  font-size: 10px;
+  margin-left: 10px;
 }
 
-.dead-stats {
-  bottom: -40px;
+.achivements-container {
+  position: relative;
+  width: 120px;
+  font-size: 10px;
+}
+
+.whole-right-side {
+  display: flex;
+  flex-direction: column;
 }
